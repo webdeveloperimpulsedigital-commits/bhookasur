@@ -205,6 +205,151 @@ export interface CuisineProfile {
 
 // 1. EXACT SIGNATURE DISHES FOR ICONIC RESTAURANTS ACROSS INDIA
 export const ICONIC_RESTAURANT_DISHES: Record<string, DishTemplate[]> = {
+  // Mr. Vadya (Famous Vada Pav Landmark in Kalwa, Thane)
+  'mr vadya': [
+    {
+      name: "Mr. Vadya Special Vada Pav",
+      description: "Signature piping-hot golden batata vada served in fresh soft ladi pav with fiery red garlic thecha and mint-coriander chutney.",
+      price: 25,
+      image: "/api/ai/dish-image?dish=Vada%20Pav&v=v28",
+      popularity: 100,
+      rating: 5.0,
+      category: "Snacks & Starters",
+      is_veg: 1
+    },
+    {
+      name: "Cheese Burst Vada Pav",
+      description: "Crispy hot vada pav bursting with molten processed cheese, spiced butter, and garlic dry chutney.",
+      price: 45,
+      image: "/api/ai/dish-image?dish=Vada%20Pav&v=v28",
+      popularity: 99,
+      rating: 5.0,
+      category: "Snacks & Starters",
+      is_veg: 1
+    },
+    {
+      name: "Chowpatty Schezwan Vada Pav",
+      description: "Spicy Mumbai street-style vada pav slathered with tangy spicy Schezwan chutney and crispy sev.",
+      price: 35,
+      image: "/api/ai/dish-image?dish=Vada%20Pav&v=v28",
+      popularity: 98,
+      rating: 4.9,
+      category: "Snacks & Starters",
+      is_veg: 1
+    },
+    {
+      name: "Ulta Vada Pav (Special)",
+      description: "Inverted pav stuffed with spicy potato mash, coated in seasoned besan batter and fried golden crisp.",
+      price: 50,
+      image: "/api/ai/dish-image?dish=Vada%20Pav&v=v28",
+      popularity: 97,
+      rating: 4.9,
+      category: "Snacks & Starters",
+      is_veg: 1
+    },
+    {
+      name: "Crispy Kanda Bhaji Plate",
+      description: "Crunchy hand-sliced onion fritters spiced with ajwain and green chillies, served piping hot with fried chilies.",
+      price: 40,
+      image: "/api/ai/dish-image?dish=Kanda%20Bhaji&v=v28",
+      popularity: 98,
+      rating: 4.9,
+      category: "Snacks & Starters",
+      is_veg: 1
+    },
+    {
+      name: "Crispy Batata Bhaji Plate",
+      description: "Thin sliced spiced potato pakoras fried crisp in gram flour batter with green chutney.",
+      price: 40,
+      image: "/api/ai/dish-image?dish=Kanda%20Bhaji&v=v28",
+      popularity: 96,
+      rating: 4.8,
+      category: "Snacks & Starters",
+      is_veg: 1
+    },
+    {
+      name: "Garma Garam Masala Chai",
+      description: "Freshly brewed strong cutting chai with crushed ginger, cardamom, and whole spices.",
+      price: 20,
+      image: "/api/ai/dish-image?dish=Masala%20Chai&v=v28",
+      popularity: 99,
+      rating: 5.0,
+      category: "Desserts & Drinks",
+      is_veg: 1
+    },
+    {
+      name: "Cold Spiced Masala Taak",
+      description: "Chilled refreshing buttermilk tempered with cumin, fresh coriander, ginger, and black salt.",
+      price: 30,
+      image: "/images/food/masala_taak.jpg",
+      popularity: 97,
+      rating: 4.8,
+      category: "Desserts & Drinks",
+      is_veg: 1
+    }
+  ],
+  'mr. vadya': [
+    {
+      name: "Mr. Vadya Special Vada Pav",
+      description: "Signature piping-hot golden batata vada served in fresh soft ladi pav with fiery red garlic thecha and mint-coriander chutney.",
+      price: 25,
+      image: "/api/ai/dish-image?dish=Vada%20Pav&v=v28",
+      popularity: 100,
+      rating: 5.0,
+      category: "Snacks & Starters",
+      is_veg: 1
+    },
+    {
+      name: "Cheese Burst Vada Pav",
+      description: "Crispy hot vada pav bursting with molten processed cheese, spiced butter, and garlic dry chutney.",
+      price: 45,
+      image: "/api/ai/dish-image?dish=Vada%20Pav&v=v28",
+      popularity: 99,
+      rating: 5.0,
+      category: "Snacks & Starters",
+      is_veg: 1
+    },
+    {
+      name: "Chowpatty Schezwan Vada Pav",
+      description: "Spicy Mumbai street-style vada pav slathered with tangy spicy Schezwan chutney and crispy sev.",
+      price: 35,
+      image: "/api/ai/dish-image?dish=Vada%20Pav&v=v28",
+      popularity: 98,
+      rating: 4.9,
+      category: "Snacks & Starters",
+      is_veg: 1
+    },
+    {
+      name: "Ulta Vada Pav (Special)",
+      description: "Inverted pav stuffed with spicy potato mash, coated in seasoned besan batter and fried golden crisp.",
+      price: 50,
+      image: "/api/ai/dish-image?dish=Vada%20Pav&v=v28",
+      popularity: 97,
+      rating: 4.9,
+      category: "Snacks & Starters",
+      is_veg: 1
+    },
+    {
+      name: "Crispy Kanda Bhaji Plate",
+      description: "Crunchy hand-sliced onion fritters spiced with ajwain and green chillies, served piping hot with fried chilies.",
+      price: 40,
+      image: "/api/ai/dish-image?dish=Kanda%20Bhaji&v=v28",
+      popularity: 98,
+      rating: 4.9,
+      category: "Snacks & Starters",
+      is_veg: 1
+    },
+    {
+      name: "Garma Garam Masala Chai",
+      description: "Freshly brewed strong cutting chai with crushed ginger, cardamom, and whole spices.",
+      price: 20,
+      image: "/api/ai/dish-image?dish=Masala%20Chai&v=v28",
+      popularity: 99,
+      rating: 5.0,
+      category: "Desserts & Drinks",
+      is_veg: 1
+    }
+  ],
   // Relax Pure Veg & Fast Food (Sinhagad Road / Pune Landmark)
   'relax': [
     {
@@ -5273,7 +5418,7 @@ export const CUISINE_MENUS: CuisineProfile[] = [
   // Mumbai Street Food, Pav Bhaji & Tawa Pulao
   {
     name: "Mumbai Street Food, Pav Bhaji & Tawa Pulao",
-    keywords: ['pav bhaji', 'tawa pulao', 'bhel', 'chaat', 'pani puri', 'sev puri', 'dahi puri', 'dabeli', 'ragda pattice', 'vada pav', 'samosa', 'kachori', 'relax', 'girija', 'sardar', 'honest'],
+    keywords: ['pav bhaji', 'tawa pulao', 'bhel', 'chaat', 'pani puri', 'sev puri', 'dahi puri', 'dabeli', 'ragda pattice', 'vada pav', 'vadapav', 'vadya', 'mr vadya', 'samosa', 'kachori', 'relax', 'girija', 'sardar', 'honest'],
     dishes: [
       { name: "Mumbai Street Style Tawa Pulao", description: "Fragrant long grain rice tossed on giant tawa with fresh bell peppers, green peas, paneer cubes, tomatoes & spicy pav bhaji butter spices.", price: 210, image: "/api/ai/dish-image?dish=Tawa%20Pulao&v=v28", popularity: 100, rating: 5.0, category: "Rice & Biryani", is_veg: 1 },
       { name: "Special Amul Butter Pav Bhaji", description: "Rich spiced mashed vegetable bhaji drenched in pure Amul butter, served with sizzling butter-toasted soft ladi pavs.", price: 160, image: "/api/ai/dish-image?dish=Pav%20Bhaji&v=v28", popularity: 100, rating: 5.0, category: "Snacks & Starters", is_veg: 1 },

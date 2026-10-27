@@ -8,6 +8,7 @@ import { fetchSwiggyDishesViaApify } from '@/lib/apifySwiggy';
 import { inferDishCategory, generateLiveMenuForRestaurant } from '@/lib/liveMenu';
 import { fetchZomatoDishesForRestaurant, extractCleanBrandName } from '@/lib/zomatoEngine';
 import { isGooglePlacesConfigured, fetchGooglePlaceDetails, extractDishesFromGoogleDetails } from '@/lib/googlePlaces';
+import { resolveRestaurantQuery } from '@/lib/restaurantNormalizer';
 import { withBasePath } from '@/lib/basePath';
 
 export const dynamic = 'force-dynamic';
@@ -101,7 +102,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     const paramSwiggyId = (searchParams.get('swiggy_id') || '').trim();
     const paramZomatoId = (searchParams.get('zomato_id') || '').trim();
 
-    const cacheKey = `v46_${params.id}_${paramCity.toLowerCase()}_${paramName.toLowerCase()}_${searchQuery.toLowerCase()}`;
+    const cacheKey = `v47_${params.id}_${paramCity.toLowerCase()}_${paramName.toLowerCase()}_${searchQuery.toLowerCase()}`;
     const cached = dishesCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < MENU_CACHE_TTL_MS) {
       return NextResponse.json(cached.response, { headers: CACHE_HEADERS });
@@ -128,9 +129,19 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     }
 
     const restName = paramName || restInfo?.name || '';
-    const cleanBrand = extractCleanBrandName(restName);
-    const restCity = paramCity || restInfo?.city || (lat && lng ? 'current' : 'pune');
-    const restArea = paramArea || restInfo?.area || '';
+    const brandResolution = resolveRestaurantQuery(restName, paramCity);
+    const canonicalName = brandResolution.isResolved ? brandResolution.canonicalName : restName;
+    const cleanBrand = extractCleanBrandName(canonicalName || restName);
+    const effectiveCity = brandResolution.city || paramCity || restInfo?.city || (lat && lng ? 'current' : 'pune');
+    const effectiveArea = brandResolution.area || paramArea || restInfo?.area || '';
+
+    // Search targets in priority order: canonical brand, known aliases, clean brand, and raw input
+    const searchBrandTargets = Array.from(new Set([
+      canonicalName,
+      ...brandResolution.searchVariations,
+      cleanBrand,
+      restName
+    ].filter(Boolean)));
 
     // Resolve Swiggy ID: prefer explicit query param, then DB swiggy_id, then params.id if formatted as swiggy_ or valid numeric
     const rawSwiggyId = paramSwiggyId || dbRest?.swiggy_id || (params.id.startsWith('swiggy_') ? params.id.replace(/^swiggy_/, '') : '');
@@ -147,24 +158,16 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     // =========================================================================
 
     const fetchZomato = async (): Promise<Dish[]> => {
-      if (!restName && !cleanBrand && !activeZomatoUrl && !activeZomatoId) return [];
+      if (searchBrandTargets.length === 0 && !activeZomatoUrl && !activeZomatoId) return [];
       try {
-        const zDishes = await fetchZomatoDishesForRestaurant(restName, {
-          city: restCity,
-          area: restArea,
-          zomatoUrl: activeZomatoUrl,
-          restaurantId: params.id
-        });
-        if (zDishes && zDishes.length > 0) return zDishes;
-
-        // Try clean brand if different from restName
-        if (cleanBrand && cleanBrand !== restName) {
-          const zBrandDishes = await fetchZomatoDishesForRestaurant(cleanBrand, {
-            city: restCity,
-            area: restArea,
+        for (const targetName of searchBrandTargets) {
+          const zDishes = await fetchZomatoDishesForRestaurant(targetName, {
+            city: effectiveCity,
+            area: effectiveArea,
+            zomatoUrl: activeZomatoUrl,
             restaurantId: params.id
           });
-          if (zBrandDishes && zBrandDishes.length > 0) return zBrandDishes;
+          if (zDishes && zDishes.length > 0) return zDishes;
         }
 
         return [];
@@ -194,32 +197,31 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
         }
       }
 
-      // 2. Direct Swiggy name search across coordinate clusters (using clean brand name)
-      const swiggySearchTarget = cleanBrand || restName;
-      if (swiggySearchTarget) {
+      // 2. Direct Swiggy name search across coordinate clusters (trying each candidate target)
+      for (const target of searchBrandTargets) {
         try {
-          const directDishes = await searchSwiggyDirectForMenu(swiggySearchTarget, restCity, {
+          const directDishes = await searchSwiggyDirectForMenu(target, effectiveCity, {
             lat: !isNaN(lat) ? lat : undefined,
             lng: !isNaN(lng) ? lng : undefined,
-            area: restArea
+            area: effectiveArea
           });
           if (directDishes && directDishes.length > 0) {
             return directDishes;
           }
         } catch (err) {
-          console.warn('Direct Swiggy multi-zone search notice for', restName, err);
+          console.warn('Direct Swiggy multi-zone search notice for', target, err);
         }
       }
 
       // 3. Apify Swiggy live menu scraper
-      if (swiggySearchTarget) {
+      for (const target of searchBrandTargets) {
         try {
-          const liveDishes = await fetchSwiggyDishesViaApify(swiggySearchTarget, restCity, { lat, lng });
+          const liveDishes = await fetchSwiggyDishesViaApify(target, effectiveCity, { lat, lng });
           if (liveDishes && liveDishes.length > 0) {
             return liveDishes;
           }
         } catch (err) {
-          console.warn('Live Swiggy menu fetch notice for', restName, err);
+          console.warn('Live Swiggy menu fetch notice for', target, err);
         }
       }
 
@@ -250,15 +252,15 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     // =========================================================================
     // PRIORITY 3: GOOGLE SEARCH / GOOGLE PLACES (Official site / customer dishes)
     // =========================================================================
-    if (baseDishes.length === 0 && restName && isGooglePlacesConfigured()) {
+    if (baseDishes.length === 0 && (canonicalName || restName) && isGooglePlacesConfigured()) {
       try {
-        const placeDetails = await fetchGooglePlaceDetails(restName, restCity);
+        const placeDetails = await fetchGooglePlaceDetails(canonicalName || restName, effectiveCity);
         if (placeDetails) {
           const googleDishes = extractDishesFromGoogleDetails(placeDetails, restInfo || {
             id: !isNaN(numId) ? numId : 850000,
-            name: restName,
-            area: restArea,
-            city: restCity
+            name: canonicalName || restName,
+            area: effectiveArea,
+            city: effectiveCity
           } as Restaurant);
           if (googleDishes.length > 0) {
             baseDishes = googleDishes;
@@ -288,15 +290,16 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     // =========================================================================
     // PRIORITY 5: TAILORED AUTHENTIC LIVE GENERATOR (Ensures user is NEVER blocked)
     // =========================================================================
-    if (baseDishes.length === 0 && restName) {
+    if (baseDishes.length === 0 && (canonicalName || restName)) {
       try {
+        const effectiveName = canonicalName || restName;
         const generated = generateLiveMenuForRestaurant({
           id: !isNaN(numId) ? numId : 850000,
-          name: restName,
+          name: effectiveName,
           description: restInfo?.description,
-          area: restArea,
-          city: restCity,
-          is_veg: paramIsVeg === '1' ? 1 : (restInfo?.is_veg ?? 0)
+          area: effectiveArea,
+          city: effectiveCity,
+          is_veg: paramIsVeg === '1' ? 1 : (restInfo?.is_veg ?? (brandResolution.isVeg ? 1 : 0))
         });
         if (generated.length > 0) {
           baseDishes = generated;

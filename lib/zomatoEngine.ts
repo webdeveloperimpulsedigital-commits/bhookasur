@@ -11,6 +11,7 @@
 
 import type { Dish } from './db';
 import { formatCleanDishName, isDishVeg, isPureVegRestaurantName } from './dishAssets';
+import { resolveRestaurantQuery } from './restaurantNormalizer';
 
 export interface ZomatoRestaurantData {
   id: string;
@@ -1165,7 +1166,13 @@ export async function fetchZomatoDishesForRestaurant(
   }
 
   // 4. Automated Live Zomato Discovery across all cities & outlets
-  const discoveredUrls = await discoverZomatoOrderUrlsFromSearch(restaurantName, city, area);
+  let discoveredUrls = await discoverZomatoOrderUrlsFromSearch(restaurantName, city, area);
+  if (discoveredUrls.length === 0) {
+    const norm = resolveRestaurantQuery(restaurantName, city);
+    if (norm.isResolved && norm.canonicalName.toLowerCase() !== restaurantName.toLowerCase()) {
+      discoveredUrls = await discoverZomatoOrderUrlsFromSearch(norm.canonicalName, city, area);
+    }
+  }
   const targetUrls: string[] = [...discoveredUrls];
 
   // 5. Fetch top candidate outlets concurrently (up to 3 outlets) and merge unique items

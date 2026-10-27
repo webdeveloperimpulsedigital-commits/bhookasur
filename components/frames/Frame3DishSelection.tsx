@@ -675,8 +675,24 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
 
                 <div className="max-h-[220px] xs:max-h-[260px] overflow-y-auto divide-y divide-slate-100 scrollbar-thin p-1 bg-white">
                   {matchingSuggestions.length === 0 ? (
-                    <div className="p-4 text-center text-xs text-slate-500 font-medium">
-                      No matching dishes found for &ldquo;{menuSearchQuery.trim()}&rdquo;
+                    <div className="p-4 text-center text-xs text-slate-600 font-medium flex flex-col items-center justify-center gap-2">
+                      <span>No matching dishes found in menu for &ldquo;{menuSearchQuery.trim()}&rdquo;</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const cleanCustomName = formatCleanDishName(menuSearchQuery.trim(), restaurant.name);
+                          const visual = getDishVisualAssets(cleanCustomName, undefined, restaurant.name);
+                          onSelectDish({
+                            name: cleanCustomName,
+                            price: 180,
+                            image: visual.flyingImage || visual.plateImage
+                          });
+                          setMenuSearchQuery('');
+                        }}
+                        className="px-3 py-1.5 bg-[#D4380D] hover:bg-[#ba300a] text-white rounded-lg text-xs font-black shrink-0 cursor-pointer active:scale-95 shadow-xs transition-all"
+                      >
+                        + Select &ldquo;{menuSearchQuery.trim()}&rdquo; as My Plate
+                      </button>
                     </div>
                   ) : (
                     matchingSuggestions.map((dish) => {

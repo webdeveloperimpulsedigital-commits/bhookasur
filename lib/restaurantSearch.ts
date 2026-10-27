@@ -41,6 +41,7 @@ import { isDishRelevantToSearch, isPureVegRestaurantName } from './dishAssets';
 import { pickCuisineImage, getDeterministicPlaceId } from './livePlaces';
 import { searchZomatoRestaurants, getZomatoHeritageKey, ICONIC_ZOMATO_RESTAURANTS } from './zomatoEngine';
 import { isGooglePlacesConfigured, searchGoogleRestaurantsByText } from './googlePlaces';
+import { resolveRestaurantQuery, normalizeIndianSpelling } from './restaurantNormalizer';
 
 const RESULT_LIMIT = 15;
 const HUB_CONCURRENCY = 6;
@@ -390,7 +391,10 @@ function createCustomPlaceEntry(
 ): VerifiedRestaurant {
   const parsed = parseLocationFromQuery(rawQuery);
   const rawName = (parsed.nameQuery || rawQuery).trim();
-  const cleanName = rawName
+  const normalizedSpelling = normalizeIndianSpelling(rawName);
+  const brandResolution = resolveRestaurantQuery(normalizedSpelling || rawName, targetLoc?.label);
+  const resolvedName = brandResolution.isResolved ? brandResolution.canonicalName : (normalizedSpelling || rawName);
+  const cleanName = resolvedName
     .split(' ')
     .filter(Boolean)
     .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
@@ -398,10 +402,32 @@ function createCustomPlaceEntry(
 
   const locLabel = targetLoc?.label || '';
   const parts = locLabel ? locLabel.split(',').map(s => s.trim()) : [];
-  let area = parts[0] || '';
-  let city = parts[1] || (parts[0] && !['local', 'area', 'local area'].includes(parts[0].toLowerCase()) ? parts[0] : '') || '';
-  const lat = targetLoc?.lat ?? userCoords?.lat ?? 0;
-  const lng = targetLoc?.lng ?? userCoords?.lng ?? 0;
+  let area = brandResolution.area || parts[0] || '';
+  let city = brandResolution.city || parts[1] || (parts[0] && !['local', 'area', 'local area'].includes(parts[0].toLowerCase()) ? parts[0] : '') || '';
+
+  // If area or city is not set by targetLoc, extract from query's parsed locationText
+  let gazLat: number | undefined;
+  let gazLng: number | undefined;
+  if ((!area || !city) && parsed.locationText) {
+    const locGaz = lookupGazetteer(parsed.locationText);
+    if (locGaz) {
+      gazLat = locGaz.lat;
+      gazLng = locGaz.lng;
+      const gazParts = locGaz.label.split(',').map(s => s.trim());
+      if (gazParts.length > 1) {
+        if (!area) area = gazParts[0];
+        if (!city) city = gazParts[1];
+      } else {
+        if (!city) city = locGaz.label;
+        if (!area) area = locGaz.label;
+      }
+    } else {
+      if (!area) area = parsed.locationText.trim();
+    }
+  }
+
+  const lat = targetLoc?.lat ?? userCoords?.lat ?? gazLat ?? 0;
+  const lng = targetLoc?.lng ?? userCoords?.lng ?? gazLng ?? 0;
 
   if (!city && lat && lng) {
     city = findNearestCityFromCoords(lat, lng) || '';
@@ -409,7 +435,7 @@ function createCustomPlaceEntry(
   }
 
   const id = getDeterministicPlaceId(cleanName, city, area);
-  const isVeg = isPureVegRestaurantName(cleanName) ? 1 : 0;
+  const isVeg = brandResolution.isVeg !== undefined ? (brandResolution.isVeg ? 1 : 0) : (isPureVegRestaurantName(cleanName) ? 1 : 0);
 
   const address = area && city && area.toLowerCase() !== city.toLowerCase()
     ? `${cleanName}, ${area}, ${city}`
@@ -1041,16 +1067,26 @@ export async function searchRestaurantsAnywhere(
     return cachedHit.result;
   }
 
-  // Live spell check / suggestion check concurrently
-  const [googleCorrection] = await Promise.all([
-    getGoogleSpellCorrection(query)
-  ]);
-  const spellingSuggestion = (googleCorrection && googleCorrection.toLowerCase() !== query.toLowerCase())
-    ? googleCorrection
-    : undefined;
-
   const merged = new Map<string, ScoredVerifiedRestaurant>();
   const parsed = parseLocationFromQuery(query);
+  const targetName = (parsed.nameQuery || query).trim();
+
+  // Fast brand normalizer & spell check concurrently
+  const resolvedBrand = resolveRestaurantQuery(targetName, (options.selectedCity || parsed.locationText) || undefined);
+  const normalizedQuery = normalizeIndianSpelling(targetName);
+
+  const [googleCorrection] = await Promise.all([
+    getGoogleSpellCorrection(targetName)
+  ]);
+
+  let spellingSuggestion: string | undefined = undefined;
+  if (resolvedBrand.isResolved && resolvedBrand.canonicalName.toLowerCase() !== targetName.toLowerCase()) {
+    spellingSuggestion = parsed.locationText ? `${resolvedBrand.canonicalName} ${parsed.locationText}` : resolvedBrand.canonicalName;
+  } else if (normalizedQuery.toLowerCase() !== targetName.toLowerCase()) {
+    spellingSuggestion = parsed.locationText ? `${normalizedQuery} ${parsed.locationText}` : normalizedQuery;
+  } else if (googleCorrection && googleCorrection.toLowerCase() !== query.toLowerCase()) {
+    spellingSuggestion = googleCorrection;
+  }
 
   // Resolve reference coordinates: user coordinates or selected city
   const cityKey = (options.selectedCity || '').toLowerCase().trim();

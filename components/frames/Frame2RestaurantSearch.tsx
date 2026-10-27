@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, MapPin, X, Check } from 'lucide-react';
+import { Search, MapPin, X, Check, Sparkles } from 'lucide-react';
 import type { Restaurant } from '@/lib/db';
 import { isPureVegRestaurantName } from '@/lib/dishAssets';
 import { parseRestaurantQuery, getDeterministicPlaceId } from '@/lib/locationParser';
+import { resolveRestaurantQuery } from '@/lib/restaurantNormalizer';
 import { withBasePath } from '@/lib/basePath';
 
 interface Frame2RestaurantSearchProps {
@@ -244,14 +245,18 @@ export const Frame2RestaurantSearch: React.FC<Frame2RestaurantSearchProps> = ({
   };
 
   const createCustomRestaurant = (name: string): Restaurant => {
-    const cleanTitle = name
+    // Check if typo normalizer resolves this to an iconic brand or heritage spot
+    const brandResolution = resolveRestaurantQuery(name, selectedCity);
+    const resolvedName = brandResolution.isResolved ? brandResolution.canonicalName : name;
+
+    const cleanTitle = resolvedName
       .split(' ')
       .filter(Boolean)
       .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
       .join(' ');
-    const isVeg = isPureVegRestaurantName(cleanTitle) ? 1 : 0;
-    const parsed = parseRestaurantQuery(cleanTitle, selectedCity || '', coords);
-    let resolvedCity = parsed.city || selectedCity || '';
+    const isVeg = brandResolution.isVeg !== undefined ? (brandResolution.isVeg ? 1 : 0) : (isPureVegRestaurantName(cleanTitle) ? 1 : 0);
+    const parsed = parseRestaurantQuery(cleanTitle, brandResolution.city || selectedCity || '', coords);
+    let resolvedCity = brandResolution.city || parsed.city || selectedCity || '';
     if (!resolvedCity && coords?.lat && coords?.lng) {
       if (coords.lat >= 18.9 && coords.lat <= 19.4 && coords.lng >= 72.7 && coords.lng <= 73.2) {
         resolvedCity = cleanTitle.toLowerCase().includes('thane') ? 'Thane' : 'Mumbai';
@@ -262,7 +267,7 @@ export const Frame2RestaurantSearch: React.FC<Frame2RestaurantSearchProps> = ({
     if (!resolvedCity) {
       resolvedCity = locationLabel || (cleanTitle.toLowerCase().includes('thane') ? 'Thane' : 'Mumbai');
     }
-    const locArea = (locationLabel && locationLabel !== resolvedCity ? locationLabel : '') || parsed.area || resolvedCity;
+    const locArea = brandResolution.area || (locationLabel && locationLabel !== resolvedCity ? locationLabel : '') || parsed.area || resolvedCity;
     const id = getDeterministicPlaceId(cleanTitle, resolvedCity, locArea);
 
     let finalLat = coords?.lat || (parsed.latitude !== 0 ? parsed.latitude : 0);
@@ -300,7 +305,7 @@ export const Frame2RestaurantSearch: React.FC<Frame2RestaurantSearchProps> = ({
       status: 'active',
       is_veg: isVeg,
       is_verified: 1,
-      verification_source: 'google',
+      verification_source: brandResolution.isResolved ? 'zomato' : 'google',
       cuisine_tags: isVeg ? ['Pure Veg', 'Street Food'] : ['Authentic Dining', 'Street Food']
     } as Restaurant;
   };
@@ -332,6 +337,17 @@ export const Frame2RestaurantSearch: React.FC<Frame2RestaurantSearchProps> = ({
       setChosenSpot(searchMatch);
       onSelectRestaurant(searchMatch);
       return searchMatch;
+    }
+
+    // 2.5 Check if brand normalizer resolves this query to an iconic brand in searchResults
+    const brandResolution = resolveRestaurantQuery(query, selectedCity);
+    if (brandResolution.isResolved) {
+      const canonicalMatch = findVerifiedMatch(brandResolution.canonicalName);
+      if (canonicalMatch) {
+        setChosenSpot(canonicalMatch);
+        onSelectRestaurant(canonicalMatch);
+        return canonicalMatch;
+      }
     }
 
     // 3. Fallback to top result from live search if available
@@ -462,6 +478,26 @@ export const Frame2RestaurantSearch: React.FC<Frame2RestaurantSearchProps> = ({
         {/* Live Search Autocomplete Dropdown */}
         {showDropdown && (
           <div className="absolute top-[105%] inset-x-0 z-50 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden max-h-[260px] sm:max-h-[300px] overflow-y-auto p-1.5 scrollbar-thin">
+            {/* Spelling Correction Suggestion Banner */}
+            {spellingSuggestion && spellingSuggestion.toLowerCase() !== searchQuery.toLowerCase().trim() && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery(spellingSuggestion);
+                }}
+                className="w-full text-left p-2.5 bg-amber-50 hover:bg-amber-100/90 border border-amber-200 rounded-lg text-xs font-bold text-amber-900 flex items-center justify-between gap-2 transition-all cursor-pointer mb-1.5 shadow-2xs"
+              >
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                  <span className="text-[#D4380D] font-black text-xs shrink-0">Did you mean:</span>
+                  <span className="text-[#0B1B48] font-black underline truncate">{spellingSuggestion}</span>
+                </div>
+                <span className="text-[10px] font-black text-[#D4380D] bg-white border border-amber-300 px-2 py-0.5 rounded-full shrink-0 shadow-2xs">
+                  Click to use
+                </span>
+              </button>
+            )}
+
             {/* List of matching search results */}
             {searchResults.length > 0 ? (
               searchResults.map((spot, idx) => {
