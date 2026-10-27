@@ -10,6 +10,7 @@ import { fetchZomatoDishesForRestaurant, extractCleanBrandName } from '@/lib/zom
 import { isGooglePlacesConfigured, fetchGooglePlaceDetails, extractDishesFromGoogleDetails } from '@/lib/googlePlaces';
 import { resolveRestaurantQuery } from '@/lib/restaurantNormalizer';
 import { withBasePath } from '@/lib/basePath';
+import { fetchGeminiDishesForRestaurant } from '@/lib/geminiMenuGenerator';
 
 export const dynamic = 'force-dynamic';
 
@@ -288,7 +289,29 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     }
 
     // =========================================================================
-    // PRIORITY 5: TAILORED AUTHENTIC LIVE GENERATOR (Ensures user is NEVER blocked)
+    // PRIORITY 5: GOOGLE GEMINI AI REAL-WORLD MENU DISCOVERY
+    // =========================================================================
+    if (baseDishes.length === 0 && (canonicalName || restName)) {
+      try {
+        const effectiveName = canonicalName || restName;
+        const geminiDishes = await fetchGeminiDishesForRestaurant({
+          restaurantId: !isNaN(numId) ? numId : 850000,
+          restaurantName: effectiveName,
+          area: effectiveArea,
+          city: effectiveCity,
+          isVeg: paramIsVeg === '1' || restInfo?.is_veg === 1 || brandResolution.isVeg
+        });
+        if (geminiDishes && geminiDishes.length > 0) {
+          baseDishes = geminiDishes;
+          source = 'gemini_ai_menu';
+        }
+      } catch (geminiMenuErr) {
+        console.warn('Gemini AI menu fetch notice for', restName, geminiMenuErr);
+      }
+    }
+
+    // =========================================================================
+    // PRIORITY 6: TAILORED AUTHENTIC LIVE GENERATOR (Ensures user is NEVER blocked)
     // =========================================================================
     if (baseDishes.length === 0 && (canonicalName || restName)) {
       try {
