@@ -294,16 +294,17 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     if (baseDishes.length === 0 && (canonicalName || restName)) {
       try {
         const effectiveName = canonicalName || restName;
-        const geminiDishes = await fetchGeminiDishesForRestaurant({
+        const geminiResult = await fetchGeminiDishesForRestaurant({
           restaurantId: !isNaN(numId) ? numId : 850000,
           restaurantName: effectiveName,
           area: effectiveArea,
           city: effectiveCity,
-          isVeg: paramIsVeg === '1' || restInfo?.is_veg === 1 || brandResolution.isVeg
+          isVeg: paramIsVeg === '1' || restInfo?.is_veg === 1 || brandResolution.isVeg,
+          zomatoUrl: activeZomatoUrl
         });
-        if (geminiDishes && geminiDishes.length > 0) {
-          baseDishes = geminiDishes;
-          source = 'gemini_ai_menu';
+        if (geminiResult && geminiResult.dishes.length > 0) {
+          baseDishes = geminiResult.dishes;
+          source = geminiResult.source || 'gemini_ai_menu';
         }
       } catch (geminiMenuErr) {
         console.warn('Gemini AI menu fetch notice for', restName, geminiMenuErr);
