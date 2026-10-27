@@ -156,6 +156,21 @@ export async function trackUserStep(options: TrackStepOptions): Promise<void> {
     }
   };
 
+  // Also forward step to Google Analytics GA4 if available
+  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+    try {
+      window.gtag('event', options.stepName, {
+        event_category: 'campaign_journey',
+        event_label: options.stepTitle || formatStepTitle(options.stepName),
+        step_number: options.stepNumber,
+        food_meter: options.foodMeterPercentage,
+        user_location: options.userLocation,
+      });
+    } catch {
+      // Ignore GA4 errors silently
+    }
+  }
+
   try {
     // Use keepalive fetch to ensure requests complete even during quick navigation
     await fetch('/api/campaign/journey/step', {
