@@ -51,7 +51,7 @@ export const StepDish: React.FC<StepDishProps> = ({
     const currentReqId = ++activeReqIdRef.current;
     setIsLoading(true);
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 25000);
+    const timer = setTimeout(() => controller.abort(), 10000);
 
     try {
       const queryParams = new URLSearchParams({
