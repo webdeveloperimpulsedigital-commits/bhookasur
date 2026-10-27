@@ -624,13 +624,6 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
                   </div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={handleConfirm}
-                className="text-[10px] font-black text-white bg-[#D4380D] hover:bg-[#ba300a] px-3 py-1.5 rounded-lg shrink-0 shadow-xs cursor-pointer active:scale-95"
-              >
-                KHILAOO ➡️
-              </button>
             </div>
           )}
 
