@@ -1,0 +1,52 @@
+import type { Metadata } from "next";
+import "leaflet/dist/leaflet.css";
+import "./globals.css";
+import { BasePathProvider } from "@/components/BasePathProvider";
+
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://gastrium.in/bhookasur_ka_food_tour';
+
+export const metadata: Metadata = {
+  metadataBase: new URL(appUrl),
+  title: "Bhookasur Ka Food Tour – Interactive Food Campaign & Contest",
+  description: "Travel across iconic Indian restaurants with Bhookasur! Feed his legendary appetite, fill the food meter, experience the Gastrium moment, and participate in the grand campaign.",
+  keywords: ["Bhookasur", "Food Tour", "Gastrium", "Indian Food", "Pune", "Mumbai", "Delhi", "Food Campaign"],
+  icons: {
+    icon: '/favicon.ico',
+  },
+  openGraph: {
+    title: "Bhookasur Ka Food Tour 🍔🔥",
+    description: "Maine Bhookasur ke saath Food Tour kiya! Aap bhi Bhookasur ke saath Food Tour kijiye aur apna food spot share kijiye!",
+    type: "website",
+    url: appUrl,
+    siteName: "Bhookasur Food Tour",
+    images: [
+      {
+        url: `${appUrl}/images/final-frames/food-tour-img-gastrium.jpg`,
+        width: 360,
+        height: 360,
+        alt: "Bhookasur Ka Food Tour"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Bhookasur Ka Food Tour 🍔🔥",
+    description: "Maine Bhookasur ke saath Food Tour kiya! Aap bhi Bhookasur ke saath Food Tour kijiye aur apna food spot share kijiye!",
+    images: [`${appUrl}/images/final-frames/food-tour-img-gastrium.jpg`]
+  }
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body className="min-h-screen bg-black text-white antialiased">
+        <BasePathProvider>{children}</BasePathProvider>
+      </body>
+    </html>
+  );
+}
+

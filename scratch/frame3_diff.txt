@@ -1,0 +1,579 @@
+﻿diff --git a/components/frames/Frame3DishSelection.tsx b/components/frames/Frame3DishSelection.tsx
+index cff5b58..a29a333 100644
+--- a/components/frames/Frame3DishSelection.tsx
++++ b/components/frames/Frame3DishSelection.tsx
+@@ -126,6 +126,32 @@ function getInitialDishes(restaurant: Restaurant): Dish[] {
+   ];
+ }
+ 
++// Course category inference for consistent categorization across all dishes
++function getCourseBucket(name: string, desc = '', cat = ''): string {
++  const n = name.toLowerCase();
++  const d = desc.toLowerCase();
++  const c = cat.toLowerCase();
++
++  if (c.includes('thali') || c.includes('combo') || n.includes('thali') || n.includes('combo') || n.includes('platter') || d.includes('thali')) {
++    return 'Thalis & Combos';
++  }
++  if (c.includes('bread') || ((n.includes('bhakri') || n.includes('naan') || n.includes('roti') || n.includes('paratha') || n.includes('kulcha') || n.includes('chapati') || n.includes('phulka')) && !n.includes('misal') && !n.includes('vada'))) {
++    return 'Indian Breads';
++  }
++  if (c.includes('rice') || c.includes('biryani') || n.includes('biryani') || n.includes('pulao') || n.includes('pulav') || n.includes('khichdi') || n.includes('jeera rice') || n.includes('fried rice') || (n.includes('rice') && !n.includes('bhakri')) || n.includes('bhat') || n.includes('bhaat')) {
++    return 'Rice & Biryani';
++  }
++  if (c.includes('dessert') || c.includes('sweet') || c.includes('beverage') || c.includes('drink') || c.includes('ice cream') || c.includes('coffee') || c.includes('tea') ||
++      n.includes('jamun') || n.includes('kulfi') || n.includes('falooda') || n.includes('lassi') || n.includes('mastani') || n.includes('brownie') || n.includes('cake') || n.includes('custard') || n.includes('solkadhi') || n.includes('chai') || n.includes('coffee') || n.includes('shake') || n.includes('mattha') || n.includes('sharbat') || n.includes('jalebi') || n.includes('sheera')) {
++    return 'Desserts & Drinks';
++  }
++  if (c.includes('tandoori') || c.includes('starter') || c.includes('snack') || c.includes('street') || c.includes('chinese') || c.includes('momo') ||
++      n.includes('tikka') || n.includes('kebab') || n.includes('kabab') || n.includes('lollipop') || n.includes('koliwada') || n.includes('fry') || n.includes('crispy') || n.includes('momo') || n.includes('roll') || n.includes('chaat') || n.includes('vadi') || n.includes('pakoda') || n.includes('bhajji') || n.includes('samosa') || n.includes('bhel') || n.includes('dosa') || n.includes('idli') || n.includes('vada pav') || n.includes('misal') || n.includes('sandwich') || n.includes('fries') || n.includes('spring roll') || n.includes('soup') || n.includes('noodles')) {
++    return 'Starters & Snacks';
++  }
++  return 'Main Course';
++}
++
+ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
+   restaurant,
+   selectedDish,
+@@ -135,6 +161,7 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
+ }) => {
+   const [rawDishes, setRawDishes] = useState<Dish[]>([]);
+   const [menuSearchQuery, setMenuSearchQuery] = useState<string>('');
++  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+   const [isLoading, setIsLoading] = useState<boolean>(true);
+ 
+   // Fetch Live Menu from API for selected restaurant
+@@ -142,6 +169,7 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
+     let isCancelled = false;
+     setRawDishes([]);
+     setMenuSearchQuery('');
++    setSelectedCategory('All');
+     setIsLoading(true);
+ 
+     async function loadDishes() {
+@@ -235,18 +263,11 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
+     return list;
+   }, [rawDishes, restaurant, isPureVegRestaurant, isNonVegRestaurant]);
+ 
+-  // Extract top 3 signature dishes for quick 1-tap picks at top
++  // Extract top 3 signature dishes guaranteeing diverse culinary courses (Main Course, Bread/Starter, Rice/Dessert)
+   const threeDishes: Dish[] = useMemo(() => {
+     let candidates = allRestaurantDishes;
+-    // CRITICAL: Unless the restaurant is explicitly a non-veg specialty joint,
+-    // the top 3 quick-pick featured cards MUST ALWAYS BE 100% PURE VEGETARIAN!
+-    // This guarantees that vegetarian diners NEVER see Chicken/Mutton on top cards,
+-    // while non-veg users can still pick any dish via live menu or search.
+-    if (!isNonVegRestaurant) {
+-      const vegCandidates = candidates.filter(d => isDishVeg(d.name) && d.is_veg !== 0);
+-      if (vegCandidates.length >= 3) {
+-        candidates = vegCandidates;
+-      }
++    if (isPureVegRestaurant) {
++      candidates = candidates.filter(d => isDishVeg(d.name) && d.is_veg !== 0);
+     }
+     const sorted = [...candidates].sort((a, b) => {
+       const rDiff = (b.rating || 0) - (a.rating || 0);
+@@ -256,7 +277,31 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
+       }
+       return (b.popularity || 0) - (a.popularity || 0);
+     });
+-    return sorted.slice(0, 3);
++
++    const chosen: Dish[] = [];
++    const usedBuckets = new Set<string>();
++
++    // 1. Pick highest rated item from distinct courses
++    for (const d of sorted) {
++      const bucket = getCourseBucket(d.name, d.description, d.category);
++      if (!usedBuckets.has(bucket)) {
++        usedBuckets.add(bucket);
++        chosen.push(d);
++        if (chosen.length === 3) break;
++      }
++    }
++
++    // 2. Fallback if fewer than 3 distinct courses exist
++    if (chosen.length < 3) {
++      for (const d of sorted) {
++        if (!chosen.some(c => c.name.toLowerCase() === d.name.toLowerCase())) {
++          chosen.push(d);
++          if (chosen.length === 3) break;
++        }
++      }
++    }
++
++    return chosen.slice(0, 3);
+   }, [allRestaurantDishes, isNonVegRestaurant]);
+ 
+   // Contextual, authentic search placeholder matching this restaurant's real food
+@@ -426,6 +471,50 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
+     return matches;
+   }, [allRestaurantDishes, menuSearchQuery, restaurant.name, isPureVegRestaurant, restaurant.id]);
+ 
++  // Dynamic categories with dish count
++  const availableCategories = useMemo(() => {
++    const counts: Record<string, number> = {
++      'All': allRestaurantDishes.length
++    };
++    for (const dish of allRestaurantDishes) {
++      const bucket = getCourseBucket(dish.name, dish.description, dish.category);
++      counts[bucket] = (counts[bucket] || 0) + 1;
++    }
++
++    const standardOrder = [
++      'All',
++      'Starters & Snacks',
++      'Main Course',
++      'Indian Breads',
++      'Rice & Biryani',
++      'Desserts & Drinks',
++      'Thalis & Combos'
++    ];
++
++    return standardOrder
++      .filter(cat => counts[cat] && counts[cat] > 0)
++      .map(cat => ({ name: cat, count: counts[cat] }));
++  }, [allRestaurantDishes]);
++
++  // Complete list of displayed dishes: filtered by category tab and search query
++  const displayedDishes = useMemo(() => {
++    // If user is searching with text, use matchingSuggestions (which supports typo tolerance & cross-catalog search)
++    if (menuSearchQuery.trim()) {
++      let list = matchingSuggestions;
++      if (selectedCategory !== 'All') {
++        list = list.filter(d => getCourseBucket(d.name, d.description, d.category) === selectedCategory);
++      }
++      return list;
++    }
++
++    // Default: Show all dishes for this restaurant, filtered by selected category
++    let list = allRestaurantDishes;
++    if (selectedCategory !== 'All') {
++      list = list.filter(d => getCourseBucket(d.name, d.description, d.category) === selectedCategory);
++    }
++    return list;
++  }, [allRestaurantDishes, matchingSuggestions, menuSearchQuery, selectedCategory]);
++
+   // Auto-select first recommended dish when restaurant changes
+   const hasAutoSelectedRef = useRef<boolean>(false);
+   useEffect(() => {
+@@ -481,14 +570,31 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
+   return (
+     <div className="w-full h-full min-h-0 flex flex-col justify-start items-start text-left animate-in fade-in duration-300 p-3 sm:p-4 gap-2.5 bg-white overflow-y-auto scrollbar-thin relative pb-8">
+       {/* 1. Headline */}
+-      <div className="text-left shrink-0">
+-        <h2 className="text-[19px] xs:text-[21px] sm:text-[26px] font-black text-[#0B1B48] leading-[1.15] tracking-tight">
++      <div className="text-left shrink-0 w-full">
++        <h2 className="text-[19px] xs:text-[21px] sm:text-[25px] font-black text-[#0B1B48] leading-[1.15] tracking-tight">
+           Favourite food stop mil gaya<br />Ab plate decide karo.
+         </h2>
++        <div className="flex items-center justify-between mt-1 text-[11px] sm:text-xs text-slate-500 font-semibold">
++          <span>
++            Menu from <span className="text-[#D4380D] font-bold">{restaurant.name}</span>
++          </span>
++          <span className="text-[#D4380D] bg-orange-50 px-2 py-0.5 rounded-full font-bold border border-orange-200">
++            {allRestaurantDishes.length} Dishes
++          </span>
++        </div>
+       </div>
+ 
+       {/* 2. Top 3 Signature Quick-Pick Cards */}
+       <div className="shrink-0 w-full">
++        <div className="flex items-center justify-between mb-1 px-0.5">
++          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
++            <Sparkles className="w-3 h-3 text-[#D4380D]" />
++            Signature Quick Picks
++          </span>
++          <span className="text-[10px] text-slate-400">
++            1-Tap Selection
++          </span>
++        </div>
+ 
+         {isLoading && rawDishes.length === 0 ? (
+           <div className="grid grid-cols-3 gap-2 w-full animate-pulse">
+@@ -503,13 +609,14 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
+               const isSelected = selectedDish?.name?.toLowerCase() === cleanDishName.toLowerCase() ||
+                 selectedDish?.name?.toLowerCase() === dish.name.toLowerCase();
+               const visual = getDishVisualAssets(cleanDishName, dish.image, restaurant.name);
++              const courseTag = getCourseBucket(cleanDishName, dish.description, dish.category);
+ 
+               return (
+                 <button
+                   key={`quick-${dish.id}-${dish.name}`}
+                   type="button"
+                   onClick={() => handleSelectDishItem(dish)}
+-                  className={`w-full py-2 px-1.5 rounded-xl transition-all flex flex-col items-center justify-center text-center relative cursor-pointer border-2 min-h-[76px] sm:min-h-[82px] ${
++                  className={`w-full py-2 px-1.5 rounded-xl transition-all flex flex-col items-center justify-center text-center relative cursor-pointer border-2 min-h-[80px] sm:min-h-[86px] ${
+                     isSelected
+                       ? 'bg-orange-50 border-[#D4380D] text-[#D4380D] shadow-sm shadow-[#D4380D]/15 scale-[1.02]'
+                       : 'bg-white hover:bg-slate-50 border-slate-200/90 text-[#0B1B48]'
+@@ -537,11 +644,14 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
+                     />
+                   </div>
+ 
+-                  <span className={`font-black text-[11px] sm:text-xs leading-tight line-clamp-2 ${
++                  <span className={`font-black text-[11px] sm:text-xs leading-tight line-clamp-1 ${
+                     isSelected ? 'text-[#D4380D]' : 'text-[#0B1B48]'
+                   }`}>
+                     {cleanDishName}
+                   </span>
++                  <span className="text-[9px] text-slate-400 font-semibold line-clamp-1 mt-0.5">
++                    {courseTag}
++                  </span>
+                 </button>
+               );
+             })}
+@@ -549,11 +659,11 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
+         )}
+       </div>
+ 
+-      {/* 3. MENU SEARCH BAR & REAL-TIME AUTO-SUGGESTIONS (No full menu scroll) */}
++      {/* 3. FULL MENU EXPLORER & CATEGORIES (Always Visible & Searchable) */}
+       <div className="w-full shrink-0 flex flex-col rounded-2xl border-2 border-slate-200/90 bg-white overflow-hidden shadow-sm mt-0.5">
+         {/* Search Input Bar */}
+-        <div className="p-2 bg-slate-50/50">
+-          <div className="relative flex items-center w-full px-2.5 py-2 rounded-xl bg-white border border-slate-200 focus-within:border-[#D4380D] focus-within:ring-1 focus-within:ring-[#D4380D]/20 transition-all">
++        <div className="p-2 bg-slate-50/70 border-b border-slate-200/80">
++          <div className="relative flex items-center w-full px-2.5 py-1.5 rounded-xl bg-white border border-slate-200 focus-within:border-[#D4380D] focus-within:ring-1 focus-within:ring-[#D4380D]/20 transition-all">
+             <Search className="w-4 h-4 text-slate-400 shrink-0 mr-2" />
+             <input
+               type="text"
+@@ -575,148 +685,206 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
+           </div>
+         </div>
+ 
+-        {!menuSearchQuery.trim() ? null : (
+-          /* When typing: Display Live Dynamic Auto-Suggestions */
+-          <div className="border-t border-slate-100 bg-white animate-in fade-in duration-200">
+-            <div className="px-3 py-1.5 bg-orange-50/70 border-b border-orange-100/80 flex items-center justify-between text-[11px] font-bold text-slate-600">
+-              <span className="flex items-center gap-1.5 text-[#D4380D]">
+-                <Sparkles className="w-3 h-3 text-[#D4380D]" />
+-                Auto-Suggestions ({matchingSuggestions.length})
+-              </span>
+-              <span className="text-[10px] text-slate-400 font-medium truncate max-w-[150px]">
+-                Authentic from {restaurant.name}
+-              </span>
+-            </div>
++        {/* Category Filter Pills (Horizontal Scrollable) */}
++        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none px-2 py-1.5 bg-slate-50 border-b border-slate-100">
++          {availableCategories.map((cat) => (
++            <button
++              key={cat.name}
++              type="button"
++              onClick={() => setSelectedCategory(cat.name)}
++              className={`px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition-all cursor-pointer ${
++                selectedCategory === cat.name
++                  ? 'bg-[#D4380D] text-white shadow-xs'
++                  : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200/90'
++              }`}
++            >
++              {cat.name} ({cat.count})
++            </button>
++          ))}
++        </div>
+ 
+-            <div className="max-h-[220px] xs:max-h-[260px] overflow-y-auto divide-y divide-slate-100 scrollbar-thin p-1 bg-white">
+-              {matchingSuggestions.length === 0 ? (
+-                <div className="p-4 text-center space-y-1.5 bg-white">
+-                  <p className="text-xs font-bold text-slate-700">
+-                    No dishes found matching &ldquo;{menuSearchQuery}&rdquo;
+-                  </p>
+-                  <p className="text-[11px] text-slate-400">
+-                    Only authentic dishes actually served by {restaurant.name} are shown.
+-                  </p>
+-                  {onManualEntry && (
+-                    <button
+-                      type="button"
+-                      onClick={onManualEntry}
+-                      className="mt-1 text-xs font-bold text-[#D4380D] hover:underline cursor-pointer inline-flex items-center gap-1"
+-                    >
+-                      + Enter custom dish name instead
+-                    </button>
+-                  )}
+-                </div>
+-              ) : (
+-                matchingSuggestions.map((dish) => {
+-                  const cleanName = formatCleanDishName(dish.name, restaurant.name);
+-                  const isSelected =
+-                    selectedDish?.name?.toLowerCase() === cleanName.toLowerCase() ||
+-                    selectedDish?.name?.toLowerCase() === dish.name.toLowerCase();
+-                  const visual = getDishVisualAssets(cleanName, dish.image, restaurant.name);
+-                  const isVeg = dish.is_veg !== undefined ? dish.is_veg === 1 : isDishVeg(dish.name);
+-
+-                  return (
+-                    <div
+-                      key={`suggest-${dish.id}-${dish.name}`}
+-                      onClick={() => handleSelectDishItem(dish)}
+-                      className={`w-full p-2 rounded-xl transition-all flex items-center justify-between gap-2.5 cursor-pointer text-left ${
+-                        isSelected
+-                          ? 'bg-orange-50/90 border border-orange-200'
+-                          : 'hover:bg-slate-50 border border-transparent'
+-                      }`}
+-                    >
+-                      {/* Thumbnail */}
+-                      <div className="w-10 h-10 rounded-lg p-0.5 bg-slate-50 border border-slate-200/80 flex items-center justify-center shrink-0 overflow-hidden">
+-                        <img
+-                          src={visual.flyingImage || visual.plateImage}
+-                          alt={cleanName}
+-                          onError={(e) => {
+-                            const target = e.currentTarget;
+-                            if (!target.src.includes('default_feast')) {
+-                              target.src = `/api/ai/dish-image?dish=${encodeURIComponent('Special Feast')}&restaurant=Indian`;
+-                            }
+-                          }}
+-                          className="w-full h-full object-contain filter drop-shadow-xs"
+-                        />
+-                      </div>
++        {/* Section Subheader */}
++        <div className="px-3 py-1.5 bg-orange-50/70 border-b border-orange-100/80 flex items-center justify-between text-[11px] font-bold text-slate-600">
++          <span className="flex items-center gap-1.5 text-[#D4380D]">
++            <BookOpen className="w-3.5 h-3.5 text-[#D4380D]" />
++            {selectedCategory === 'All' ? 'All Menu Options' : selectedCategory} ({displayedDishes.length})
++          </span>
++          <span className="text-[10px] text-slate-400 font-medium truncate max-w-[150px]">
++            {menuSearchQuery.trim() ? `Search: "${menuSearchQuery}"` : `Authentic from ${restaurant.name}`}
++          </span>
++        </div>
+ 
+-                      {/* Info */}
+-                      <div className="flex items-start gap-2 min-w-0 flex-1">
+-                        <div className="mt-0.5 shrink-0">
+-                          {isVeg ? (
+-                            <span
+-                              className="inline-flex items-center justify-center w-3.5 h-3.5 border border-emerald-600 rounded-xs p-0.5"
+-                              title="Pure Veg"
+-                            >
+-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+-                            </span>
+-                          ) : (
+-                            <span
+-                              className="inline-flex items-center justify-center w-3.5 h-3.5 border border-red-600 rounded-xs p-0.5"
+-                              title="Non-Veg"
+-                            >
+-                              <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
+-                            </span>
+-                          )}
+-                        </div>
++        {/* Scrollable Dish Items List */}
++        <div className="max-h-[260px] xs:max-h-[300px] sm:max-h-[340px] overflow-y-auto divide-y divide-slate-100 scrollbar-thin p-1 bg-white">
++          {displayedDishes.length === 0 ? (
++            <div className="p-4 text-center space-y-1.5 bg-white">
++              <p className="text-xs font-bold text-slate-700">
++                No dishes found matching &ldquo;{menuSearchQuery}&rdquo; in {selectedCategory}
++              </p>
++              <div className="flex items-center justify-center gap-2 mt-1">
++                {menuSearchQuery && (
++                  <button
++                    type="button"
++                    onClick={() => setMenuSearchQuery('')}
++                    className="text-xs font-bold text-slate-600 hover:underline cursor-pointer"
++                  >
++                    Clear Search
++                  </button>
++                )}
++                {selectedCategory !== 'All' && (
++                  <button
++                    type="button"
++                    onClick={() => setSelectedCategory('All')}
++                    className="text-xs font-bold text-[#D4380D] hover:underline cursor-pointer"
++                  >
++                    View All Categories
++                  </button>
++                )}
++              </div>
++              {onManualEntry && (
++                <button
++                  type="button"
++                  onClick={onManualEntry}
++                  className="mt-2 text-xs font-bold text-[#D4380D] hover:underline cursor-pointer inline-flex items-center gap-1"
++                >
++                  + Enter custom dish name instead
++                </button>
++              )}
++            </div>
++          ) : (
++            displayedDishes.map((dish) => {
++              const cleanName = formatCleanDishName(dish.name, restaurant.name);
++              const isSelected =
++                selectedDish?.name?.toLowerCase() === cleanName.toLowerCase() ||
++                selectedDish?.name?.toLowerCase() === dish.name.toLowerCase();
++              const visual = getDishVisualAssets(cleanName, dish.image, restaurant.name);
++              const isVeg = dish.is_veg !== undefined ? dish.is_veg === 1 : isDishVeg(dish.name);
++              const dishCourse = getCourseBucket(cleanName, dish.description, dish.category);
+ 
+-                        <div className="min-w-0 flex-1">
+-                          <div className="flex items-center gap-1.5">
+-                            <span
+-                              className={`text-xs font-black truncate ${
+-                                isSelected ? 'text-[#D4380D]' : 'text-slate-900'
+-                              }`}
+-                            >
+-                              {cleanName}
+-                            </span>
+-                            {dish.is_recommended === 1 && (
+-                              <span className="text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded shrink-0">
+-                                Ôÿà Top Pick
+-                              </span>
+-                            )}
+-                          </div>
+-                          {dish.description && (
+-                            <div className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
+-                              {dish.description}
+-                            </div>
+-                          )}
+-                        </div>
+-                      </div>
++              return (
++                <div
++                  key={`menu-dish-${dish.id}-${dish.name}`}
++                  onClick={() => handleSelectDishItem(dish)}
++                  className={`w-full p-2 rounded-xl transition-all flex items-center justify-between gap-2.5 cursor-pointer text-left ${
++                    isSelected
++                      ? 'bg-orange-50/90 border border-orange-200'
++                      : 'hover:bg-slate-50 border border-transparent'
++                  }`}
++                >
++                  {/* Thumbnail */}
++                  <div className="w-11 h-11 rounded-lg p-0.5 bg-slate-50 border border-slate-200/80 flex items-center justify-center shrink-0 overflow-hidden">
++                    <img
++                      src={visual.flyingImage || visual.plateImage}
++                      alt={cleanName}
++                      onError={(e) => {
++                        const target = e.currentTarget;
++                        if (!target.src.includes('default_feast')) {
++                          target.src = `/api/ai/dish-image?dish=${encodeURIComponent('Special Feast')}&restaurant=Indian`;
++                        }
++                      }}
++                      className="w-full h-full object-contain filter drop-shadow-xs"
++                    />
++                  </div>
++
++                  {/* Info */}
++                  <div className="flex items-start gap-2 min-w-0 flex-1">
++                    <div className="mt-0.5 shrink-0">
++                      {isVeg ? (
++                        <span
++                          className="inline-flex items-center justify-center w-3.5 h-3.5 border border-emerald-600 rounded-xs p-0.5"
++                          title="Pure Veg"
++                        >
++                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
++                        </span>
++                      ) : (
++                        <span
++                          className="inline-flex items-center justify-center w-3.5 h-3.5 border border-red-600 rounded-xs p-0.5"
++                          title="Non-Veg"
++                        >
++                          <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
++                        </span>
++                      )}
++                    </div>
+ 
+-                      {/* Select Button */}
+-                      <div className="flex items-center shrink-0">
+-                        <button
+-                          type="button"
+-                          onClick={(e) => {
+-                            e.stopPropagation();
+-                            handleSelectDishItem(dish);
+-                          }}
+-                          className={`px-2.5 py-1 rounded-md text-[10px] font-black transition-all cursor-pointer shrink-0 ${
+-                            isSelected
+-                              ? 'bg-[#D4380D] text-white shadow-xs'
+-                              : 'bg-orange-50 hover:bg-orange-100 text-[#D4380D] border border-orange-200'
++                    <div className="min-w-0 flex-1">
++                      <div className="flex items-center gap-1.5 flex-wrap">
++                        <span
++                          className={`text-xs font-black truncate ${
++                            isSelected ? 'text-[#D4380D]' : 'text-slate-900'
+                           }`}
+                         >
+-                          {isSelected ? (
+-                            <span className="flex items-center gap-0.5">
+-                              <Check className="w-3 h-3 stroke-[3]" />
+-                              CHOSEN
+-                            </span>
+-                          ) : (
+-                            'SELECT'
+-                          )}
+-                        </button>
++                          {cleanName}
++                        </span>
++                        {dish.price && (
++                          <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-1.5 py-0.2 rounded shrink-0">
++                            Ôé╣{dish.price}
++                          </span>
++                        )}
++                        {dish.is_recommended === 1 && (
++                          <span className="text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-1 py-0.2 rounded shrink-0">
++                            Ôÿà Top Pick
++                          </span>
++                        )}
+                       </div>
++                      <div className="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400">
++                        <span className="font-semibold text-slate-500">{dishCourse}</span>
++                        {dish.rating && (
++                          <span>ÔÇó Ôÿà {Number(dish.rating).toFixed(1)}</span>
++                        )}
++                      </div>
++                      {dish.description && (
++                        <div className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
++                          {dish.description}
++                        </div>
++                      )}
+                     </div>
+-                  );
+-                })
+-              )}
+-            </div>
+-          </div>
+-        )}
++                  </div>
++
++                  {/* Select Button */}
++                  <div className="flex items-center shrink-0">
++                    <button
++                      type="button"
++                      onClick={(e) => {
++                        e.stopPropagation();
++                        handleSelectDishItem(dish);
++                      }}
++                      className={`px-2.5 py-1 rounded-md text-[10px] font-black transition-all cursor-pointer shrink-0 ${
++                        isSelected
++                          ? 'bg-[#D4380D] text-white shadow-xs'
++                          : 'bg-orange-50 hover:bg-orange-100 text-[#D4380D] border border-orange-200'
++                      }`}
++                    >
++                      {isSelected ? (
++                        <span className="flex items-center gap-0.5">
++                          <Check className="w-3 h-3 stroke-[3]" />
++                          CHOSEN
++                        </span>
++                      ) : (
++                        'SELECT'
++                      )}
++                    </button>
++                  </div>
++                </div>
++              );
++            })
++          )}
++        </div>
+       </div>
+ 
++      {/* 4. Active Selected Dish Banner */}
++      {selectedDish && (
++        <div className="w-full shrink-0 px-3 py-2 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-between text-xs">
++          <div className="flex items-center gap-1.5 min-w-0">
++            <span className="w-2 h-2 rounded-full bg-[#D4380D] shrink-0" />
++            <span className="font-bold text-slate-700 truncate">
++              Plate Selected: <span className="text-[#D4380D] font-black">{formatCleanDishName(selectedDish.name, restaurant.name)}</span>
++            </span>
++          </div>
++          {selectedDish.price ? (
++            <span className="font-black text-slate-800 shrink-0 ml-2">Ôé╣{selectedDish.price}</span>
++          ) : null}
++        </div>
++      )}
+ 
+       {/* 5. Primary CTA Button */}
+       <div className="shrink-0 w-full pt-0.5">

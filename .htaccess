@@ -1,0 +1,27 @@
+# ==============================================================================
+# Hostinger Apache / LiteSpeed Configuration for Bhookasur Ka Food Tour
+# URL: https://gastrium.in/bhookasur_ka_food_tour
+# ==============================================================================
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /bhookasur_ka_food_tour/
+
+  # Preserve Authorization headers for Admin APIs
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+  # Reverse Proxy to Node.js application (if using Hostinger port proxy)
+  # Uncomment the following lines if proxying through Apache to port 3000:
+  # RewriteCond %{REQUEST_FILENAME} !-f
+  # RewriteCond %{REQUEST_FILENAME} !-d
+  # RewriteRule ^(.*)$ http://127.0.0.1:3000/bhookasur_ka_food_tour/$1 [P,L]
+</IfModule>
+
+# Caching for high-performance static video and image delivery
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType video/mp4 "access plus 1 year"
+</IfModule>
