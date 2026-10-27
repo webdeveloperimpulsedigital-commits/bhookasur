@@ -290,9 +290,9 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     // =========================================================================
     // PRIORITY 5: TAILORED AUTHENTIC LIVE GENERATOR (Ensures user is NEVER blocked)
     // =========================================================================
-    if (baseDishes.length === 0 && (canonicalName || restName)) {
+    if (baseDishes.length === 0) {
       try {
-        const effectiveName = canonicalName || restName;
+        const effectiveName = canonicalName || restName || paramName || 'Special Food Spot';
         const generated = generateLiveMenuForRestaurant({
           id: !isNaN(numId) ? numId : 850000,
           name: effectiveName,

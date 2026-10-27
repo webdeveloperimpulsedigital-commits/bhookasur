@@ -5119,7 +5119,7 @@ export const CUISINE_MENUS: CuisineProfile[] = [
   // Vada Pav & Street Food
   {
     name: "Vada Pav & Street Food",
-    keywords: ['vadapav', 'vada pav', 'wada pav', 'batata vada', 'vada', 'wada', 'wadewale', 'wade wale', 'joshi', 'rohit', 'street food', 'babu vadapav', 'gajanan', 'jumbo king', 'nashta', 'snacks'],
+    keywords: ['vadapav', 'vada pav', 'wada pav', 'batata vada', 'vada', 'wada', 'wadewale', 'wade wale', 'vadapav wala', 'vada pav wala', 'wada pav wala', 'vadapav thela', 'vada pav thela', 'joshi', 'rohit', 'street food', 'babu vadapav', 'gajanan', 'jumbo king', 'nashta', 'snacks'],
     dishes: [
       { name: "Special Legendary Vada Pav (2 Pcs)", description: "Freshly fried golden potato dumplings stuffed in soft ladi pav with red garlic chutney.", price: 50, image: "/api/ai/dish-image?dish=Vada%20Pav&v=v28", popularity: 100, rating: 5.0 },
       { name: "Fiery Schezwan Cheese Vada Pav", description: "Loaded with melted mozzarella, spicy schezwan glaze, and roasted garlic chutney.", price: 90, image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop&q=80", popularity: 98, rating: 4.9 },
@@ -5186,13 +5186,13 @@ export const CUISINE_MENUS: CuisineProfile[] = [
   // Pav Bhaji & Chaat
   {
     name: "Pav Bhaji & Chaat Adda",
-    keywords: ['pav bhaji', 'bhel', 'chaat', 'pani puri', 'golgappe', 'sev puri', 'ragda', 'dahi puri', 'sardar', 'honest', 'relax', 'girija'],
+    keywords: ['pav bhaji', 'bhel', 'chaat', 'pani puri', 'panipuri', 'golgappe', 'golgappa', 'puchka', 'gupchup', 'pani puri wala', 'panipuri wala', 'chaat wala', 'chaatwala', 'chaat thela', 'bhel puri', 'sukha puri', 'sev puri', 'ragda', 'dahi puri', 'thela', 'stall', 'chowpatty', 'sardar', 'honest', 'relax', 'girija'],
     dishes: [
+      { name: "Pani Puri Platter (6 Pcs)", description: "Crisp puffed puris served with spicy mint pani, sweet sonth chutney & warm ragda.", price: 60, image: "/api/ai/dish-image?dish=Pani%20Puri&v=v28", popularity: 100, rating: 5.0 },
+      { name: "Special SPDP (Sev Potato Dahi Puri)", description: "Crispy puris layered with spiced potatoes, sweetened curd, date chutney & sev.", price: 110, image: "/api/ai/dish-image?dish=SPDP&v=v28", popularity: 99, rating: 5.0 },
       { name: "Special Amul Butter Pav Bhaji", description: "Mashed vegetable spiced gravy served with a floating slab of pure butter & warm pav.", price: 160, image: "https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=600&auto=format&fit=crop&q=80", popularity: 100, rating: 5.0 },
       { name: "Cheese Loaded Masala Pav Bhaji", description: "Topped with a mountain of grated mozzarella and processed cheese.", price: 190, image: "https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=600&auto=format&fit=crop&q=80", popularity: 98, rating: 4.9 },
-      { name: "Special SPDP (Sev Potato Dahi Puri)", description: "Crispy puris layered with spiced potatoes, sweetened curd, date chutney & sev.", price: 110, image: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=600&auto=format&fit=crop&q=80", popularity: 99, rating: 5.0 },
-      { name: "Pani Puri Platter (6 Pcs)", description: "Crisp puffed puris served with spicy mint pani, sweet sonth chutney & warm ragda.", price: 60, image: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=600&auto=format&fit=crop&q=80", popularity: 100, rating: 5.0 },
-      { name: "Dahi Papdi Chaat Supreme", description: "Crispy flour wafers layered with boiled chickpeas, spiced yogurt, sev & pomegranate.", price: 120, image: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=600&auto=format&fit=crop&q=80", popularity: 97, rating: 4.8 },
+      { name: "Dahi Papdi Chaat Supreme", description: "Crispy flour wafers layered with boiled chickpeas, spiced yogurt, sev & pomegranate.", price: 120, image: "/api/ai/dish-image?dish=Papdi%20Chaat&v=v28", popularity: 97, rating: 4.8 },
       { name: "Double Butter Masala Pav", description: "Soft ladi pavs drenched in sizzling butter garlic bhaji gravy.", price: 110, image: "https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=600&auto=format&fit=crop&q=80", popularity: 96, rating: 4.8 },
       { name: "Ragda Pattice Platter", description: "Crispy golden potato patties drowned in hot white pea curry, chutney & sev.", price: 120, image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=600&auto=format&fit=crop&q=80", popularity: 95, rating: 4.8 },
       { name: "Royal Mango Kulfi Falooda", description: "Chilled rose vermicelli blend with sweet basil seeds, mango puree & malai kulfi.", price: 150, image: "/api/ai/dish-image?dish=Royal%20Mango%20Kulfi%20Falooda&v=v28", popularity: 97, rating: 4.9 }
