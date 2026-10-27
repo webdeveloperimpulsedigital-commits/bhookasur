@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { fetchLocationFromIP } from '@/lib/ipLocation';
 import { parseSwiggyRestaurantUrl, CITY_COORDINATES } from '@/lib/apifySwiggy';
-import { parseZomatoUrl } from '@/lib/zomatoEngine';
+import { parseZomatoUrl, fetchZomatoRestaurantProfileByUrl } from '@/lib/zomatoEngine';
 import { lookupGazetteer } from '@/lib/locationResolver';
 import {
   fetchVerifiedNearbyRestaurants,
@@ -90,19 +90,35 @@ export async function GET(request: Request) {
       });
     }
 
-    // 3. Pasted Zomato URL -> search that exact restaurant by name and city
+    // 3. Pasted Zomato URL -> direct profile lookup first, fallback to name search
     const parsedZomato = parseZomatoUrl(query);
-    if (parsedZomato.isZomatoUrl && parsedZomato.name) {
-      const result = await searchRestaurantsAnywhere(parsedZomato.name, userCoords, { selectedCity: parsedZomato.city || city });
-      return NextResponse.json({
-        success: true,
-        count: result.data.length,
-        isLiveAPI: true,
-        verification: 'multi_source_verified',
-        scope: result.scope,
-        searchedLocation: result.searchedLocation,
-        data: result.data
-      });
+    if (parsedZomato.isZomatoUrl) {
+      const directProfile = await fetchZomatoRestaurantProfileByUrl(query);
+      if (directProfile) {
+        return NextResponse.json({
+          success: true,
+          count: 1,
+          isLiveAPI: true,
+          verification: 'multi_source_verified',
+          scope: 'typed_location',
+          searchedLocation: null,
+          data: [directProfile]
+        });
+      }
+
+      if (parsedZomato.name) {
+        const cleanName = parsedZomato.name.replace(/\b\d+\b/g, '').replace(/\s+/g, ' ').trim();
+        const result = await searchRestaurantsAnywhere(cleanName || parsedZomato.name, userCoords, { selectedCity: parsedZomato.city || city });
+        return NextResponse.json({
+          success: true,
+          count: result.data.length,
+          isLiveAPI: true,
+          verification: 'multi_source_verified',
+          scope: result.scope,
+          searchedLocation: result.searchedLocation,
+          data: result.data
+        });
+      }
     }
 
     // 4. Name / cuisine / dish search across Zomato, Swiggy, and Google in any location

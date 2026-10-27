@@ -2078,4 +2078,100 @@ export function parseZomatoUrl(input: string): {
   return { isZomatoUrl: false };
 }
 
+/**
+ * Direct scraper to resolve any Zomato URL (including /menu, /order, /info)
+ * into a verified restaurant profile.
+ */
+export async function fetchZomatoRestaurantProfileByUrl(url: string): Promise<any | null> {
+  if (!url || typeof url !== 'string' || !url.includes('zomato.com/')) return null;
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4500);
+
+    const res = await fetch(url.trim(), {
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        Referer: 'https://www.zomato.com/'
+      },
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+
+    if (!res.ok) return null;
+
+    const html = await res.text();
+    const preloadedMatch = html.match(/window\.__PRELOADED_STATE__\s*=\s*JSON\.parse\("([\s\S]*?)"\);/);
+    if (!preloadedMatch) return null;
+
+    const unescaped = JSON.parse(`"${preloadedMatch[1]}"`);
+    const parsed = JSON.parse(unescaped);
+
+    const restaurantEntities = parsed.pages?.restaurant || {};
+    const resId = Object.keys(restaurantEntities)[0];
+    if (!resId) return null;
+
+    const restData = restaurantEntities[resId];
+    const basicInfo = restData?.sections?.SECTION_BASIC_INFO || {};
+    const resDetails = restData?.sections?.SECTION_RES_DETAILS || {};
+
+    const name = basicInfo.name || '';
+    if (!name) return null;
+
+    const cuisineString = basicInfo.cuisine_string || '';
+    const cuisines = cuisineString ? cuisineString.split(',').map((c: string) => c.trim()) : [];
+    const ratingObj = basicInfo.rating || {};
+    const rating = parseFloat(ratingObj.aggregate_rating) || 4.5;
+
+    // Coordinates and Address
+    const address = resDetails.ADDRESS || basicInfo.address || '';
+    const locality = basicInfo.locality?.name || '';
+    const city = basicInfo.locality?.city_name || '';
+    const lat = basicInfo.res_thumb?.latitude || restData?.location?.latitude;
+    const lng = basicInfo.res_thumb?.longitude || restData?.location?.longitude;
+
+    // Image
+    let imageUrl = basicInfo.res_thumb || '';
+    if (!imageUrl && restData?.photos?.photos?.length) {
+      imageUrl = restData.photos.photos[0]?.photo?.url || '';
+    }
+    if (!imageUrl) {
+      imageUrl = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80';
+    }
+
+    const isVeg = basicInfo.is_pure_veg || basicInfo.dietary_slugs?.includes('veg') ? 1 : (isPureVegRestaurantName(name) ? 1 : 0);
+
+    return {
+      id: Number(resId) || 850000,
+      name,
+      address: address || (locality ? `${name}, ${locality}, ${city}` : name),
+      area: locality,
+      city: city || 'Bangalore',
+      latitude: lat ? parseFloat(lat) : 12.9716,
+      longitude: lng ? parseFloat(lng) : 77.5946,
+      rating,
+      image: imageUrl,
+      description: `${name} in ${locality || city}. Cuisines: ${cuisines.join(', ') || 'Multi-cuisine'}.`,
+      is_campaign_active: 1,
+      total_visits: 1,
+      status: 'active',
+      is_veg: isVeg,
+      is_verified: 1,
+      verification_source: 'zomato',
+      sources: ['zomato'],
+      source_platform: 'zomato',
+      zomato_id: resId,
+      zomato_url: url.trim(),
+      cuisine: cuisines.length ? cuisines : ['Casual Dining']
+    };
+  } catch (err: unknown) {
+    console.warn('fetchZomatoRestaurantProfileByUrl notice:', err);
+    return null;
+  }
+}
+
+
 

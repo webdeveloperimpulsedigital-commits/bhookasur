@@ -105,7 +105,7 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
     setLoadingStatus('Connecting to verified live menu...');
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
 
     const statusTimer = setTimeout(() => {
       if (activeRequestIdRef.current === currentReqId) {

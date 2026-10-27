@@ -48,6 +48,10 @@ function saveDishesToDbAsync(dishes: Dish[]) {
   if (!dishes || dishes.length === 0) return;
   Promise.resolve().then(async () => {
     try {
+      const restId = dishes[0].restaurant_id;
+      const existing = await db.getRestaurantById(restId).catch(() => null);
+      if (!existing) return;
+
       for (const dish of dishes.slice(0, 12)) {
         await db.createDish({
           restaurant_id: dish.restaurant_id,
@@ -67,8 +71,56 @@ function saveDishesToDbAsync(dishes: Dish[]) {
   });
 }
 
+const GEMINI_MODELS = [
+  'gemini-3-flash-preview',
+  'gemini-flash-latest',
+  'gemini-2.0-flash',
+  'gemini-1.5-flash'
+];
+
+async function callGeminiGenerateContent(
+  contents: unknown[],
+  geminiKey: string,
+  timeoutMs = 15000
+): Promise<string | null> {
+  const trimmedKey = geminiKey.trim();
+  for (const model of GEMINI_MODELS) {
+    try {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${trimmedKey}`;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents,
+          generationConfig: {
+            temperature: 0.15,
+            responseMimeType: 'application/json'
+          }
+        }),
+        signal: AbortSignal.timeout(timeoutMs)
+      });
+
+      if (!response.ok) {
+        const errText = await response.text().catch(() => '');
+        console.warn(`[Gemini] model ${model} HTTP ${response.status}: ${errText.slice(0, 100)}`);
+        continue;
+      }
+
+      const data = await response.json();
+      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (rawText && typeof rawText === 'string' && rawText.trim().length > 0) {
+        return rawText.trim();
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[Gemini] model ${model} error:`, msg);
+    }
+  }
+  return null;
+}
+
 /**
- * Uses Google Gemini 1.5 Flash Vision to perform multimodal OCR on photographed menu cards
+ * Uses Google Gemini Vision to perform multimodal OCR on photographed menu cards
  */
 async function extractDishesFromMenuCardImages(
   imageUrls: string[],
@@ -80,7 +132,7 @@ async function extractDishesFromMenuCardImages(
   for (const imgUrl of imageUrls.slice(0, 2)) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 4500);
+      const timeout = setTimeout(() => controller.abort(), 6000);
 
       const imgRes = await fetch(imgUrl, {
         headers: {
@@ -116,36 +168,21 @@ Return ONLY a valid JSON array of objects with the schema:
 ]
 Return strictly the JSON array, no markdown backticks, no other text.`;
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey.trim()}`;
-      const visionRes = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [
+      const contents = [
+        {
+          parts: [
+            { text: prompt },
             {
-              parts: [
-                { text: prompt },
-                {
-                  inline_data: {
-                    mime_type: contentType,
-                    data: base64Data
-                  }
-                }
-              ]
+              inline_data: {
+                mime_type: contentType,
+                data: base64Data
+              }
             }
-          ],
-          generationConfig: {
-            temperature: 0.1,
-            responseMimeType: 'application/json'
-          }
-        }),
-        signal: AbortSignal.timeout(6500)
-      });
+          ]
+        }
+      ];
 
-      if (!visionRes.ok) continue;
-
-      const visionData = await visionRes.json();
-      const rawText = visionData?.candidates?.[0]?.content?.parts?.[0]?.text;
+      const rawText = await callGeminiGenerateContent(contents, geminiKey, 18000);
       if (!rawText) continue;
 
       let parsed: RawGeminiDish[] = [];
@@ -264,36 +301,13 @@ Return ONLY a valid JSON array of objects with the following schema:
 No markdown wrapping, no explanation, return strictly the JSON array.`;
 
   try {
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey.trim()}`;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 6500);
+    const contents = [
+      {
+        parts: [{ text: prompt }]
+      }
+    ];
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [{ text: prompt }]
-          }
-        ],
-        generationConfig: {
-          temperature: 0.2,
-          responseMimeType: 'application/json'
-        }
-      }),
-      signal: controller.signal
-    });
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      const errText = await response.text().catch(() => '');
-      console.warn(`Gemini menu generation returned HTTP ${response.status}: ${errText.slice(0, 150)}`);
-      return { dishes: [], source: 'none' };
-    }
-
-    const data = await response.json();
-    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const rawText = await callGeminiGenerateContent(contents, geminiKey, 8000);
     if (!rawText) return { dishes: [], source: 'none' };
 
     let rawDishes: RawGeminiDish[] = [];
