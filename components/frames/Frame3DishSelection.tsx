@@ -461,14 +461,14 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
           name: finalName,
           image: finalImg
         });
-      } else {
-        const queryDish = menuSearchQuery.trim();
-        finalName = formatCleanDishName(queryDish, restaurant.name);
-        const visual = getDishVisualAssets(finalName, undefined, restaurant.name);
+      } else if (threeDishes.length > 0) {
+        const first = threeDishes[0];
+        finalName = formatCleanDishName(first.name, restaurant.name);
+        const visual = getDishVisualAssets(finalName, first.image, restaurant.name);
         finalImg = visual.flyingImage || visual.plateImage;
         onSelectDish({
+          ...first,
           name: finalName,
-          price: 180,
           image: finalImg
         });
       }
@@ -624,13 +624,6 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
                   </div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={handleConfirm}
-                className="text-[10px] font-black text-white bg-[#D4380D] hover:bg-[#ba300a] px-3 py-1.5 rounded-lg shrink-0 shadow-xs cursor-pointer active:scale-95"
-              >
-                KHILAOO ➡️
-              </button>
             </div>
           )}
 
@@ -675,23 +668,19 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
 
                 <div className="max-h-[220px] xs:max-h-[260px] overflow-y-auto divide-y divide-slate-100 scrollbar-thin p-1 bg-white">
                   {matchingSuggestions.length === 0 ? (
-                    <div className="p-4 text-center text-xs text-slate-600 font-medium flex flex-col items-center justify-center gap-2">
-                      <span>No matching dishes found in menu for &ldquo;{menuSearchQuery.trim()}&rdquo;</span>
+                    <div className="p-4 text-center text-xs text-slate-600 font-medium flex flex-col items-center justify-center gap-1.5">
+                      <span className="font-bold text-slate-800">
+                        No dishes found matching &ldquo;{menuSearchQuery.trim()}&rdquo; in {restaurant.name}&apos;s menu
+                      </span>
+                      <span className="text-[11px] text-slate-400">
+                        Please pick a dish from the menu list or choose from the top plates above.
+                      </span>
                       <button
                         type="button"
-                        onClick={() => {
-                          const cleanCustomName = formatCleanDishName(menuSearchQuery.trim(), restaurant.name);
-                          const visual = getDishVisualAssets(cleanCustomName, undefined, restaurant.name);
-                          onSelectDish({
-                            name: cleanCustomName,
-                            price: 180,
-                            image: visual.flyingImage || visual.plateImage
-                          });
-                          setMenuSearchQuery('');
-                        }}
-                        className="px-3 py-1.5 bg-[#D4380D] hover:bg-[#ba300a] text-white rounded-lg text-xs font-black shrink-0 cursor-pointer active:scale-95 shadow-xs transition-all"
+                        onClick={() => setMenuSearchQuery('')}
+                        className="mt-1 px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold cursor-pointer transition-all"
                       >
-                        + Select &ldquo;{menuSearchQuery.trim()}&rdquo; as My Plate
+                        Show All Menu Dishes
                       </button>
                     </div>
                   ) : (
@@ -788,29 +777,6 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
                         </div>
                       );
                     })
-                  )}
-                  {matchingSuggestions.length > 0 && menuSearchQuery.trim().length >= 3 && !matchingSuggestions.some(d => d.name.toLowerCase() === menuSearchQuery.trim().toLowerCase()) && (
-                    <div className="p-2 bg-orange-50/50 border-t border-orange-100 flex items-center justify-between gap-2 mt-1 rounded-b-xl">
-                      <span className="text-[11px] font-medium text-slate-600 truncate">
-                        Custom: &ldquo;{menuSearchQuery.trim()}&rdquo;
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const cleanCustomName = formatCleanDishName(menuSearchQuery.trim(), restaurant.name);
-                          const visual = getDishVisualAssets(cleanCustomName, undefined, restaurant.name);
-                          onSelectDish({
-                            name: cleanCustomName,
-                            price: 180,
-                            image: visual.flyingImage || visual.plateImage
-                          });
-                          setMenuSearchQuery('');
-                        }}
-                        className="px-2.5 py-1 bg-[#D4380D] hover:bg-[#b8300b] text-white rounded-md text-[10px] font-bold shrink-0 cursor-pointer active:scale-95"
-                      >
-                        + Select This
-                      </button>
-                    </div>
                   )}
                 </div>
               </div>

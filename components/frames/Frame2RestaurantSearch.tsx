@@ -485,14 +485,18 @@ export const Frame2RestaurantSearch: React.FC<Frame2RestaurantSearchProps> = ({
                 onClick={() => {
                   setSearchQuery(spellingSuggestion);
                 }}
-                className="w-full text-left p-2.5 bg-amber-50 hover:bg-amber-100/90 border border-amber-200 rounded-lg text-xs font-bold text-amber-900 flex items-center justify-between gap-2 transition-all cursor-pointer mb-1.5 shadow-2xs"
+                className="w-full text-left p-2 xs:p-2.5 bg-amber-50 hover:bg-amber-100/90 border border-amber-200 rounded-lg text-xs font-bold text-amber-900 flex items-center justify-between gap-2 transition-all cursor-pointer mb-1.5 shadow-2xs"
               >
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                  <span className="text-[#D4380D] font-black text-xs shrink-0">Did you mean:</span>
-                  <span className="text-[#0B1B48] font-black underline truncate">{spellingSuggestion}</span>
+                <div className="flex items-center gap-1.5 min-w-0 flex-1 flex-wrap sm:flex-nowrap">
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <span className="text-[#D4380D] font-black text-[11px] sm:text-xs shrink-0">Did you mean:</span>
+                  </div>
+                  <span className="text-[#0B1B48] font-black underline text-[11px] sm:text-xs break-words">
+                    {spellingSuggestion}
+                  </span>
                 </div>
-                <span className="text-[10px] font-black text-[#D4380D] bg-white border border-amber-300 px-2 py-0.5 rounded-full shrink-0 shadow-2xs">
+                <span className="text-[10px] font-black text-[#D4380D] bg-white border border-amber-300 px-2 py-0.5 rounded-full shrink-0 shadow-2xs whitespace-nowrap ml-1">
                   Click to use
                 </span>
               </button>
@@ -523,7 +527,7 @@ export const Frame2RestaurantSearch: React.FC<Frame2RestaurantSearchProps> = ({
                         <MapPin className="w-3.5 h-3.5 fill-[#1D4ED8]" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-bold text-xs sm:text-sm text-[#0B1B48] truncate">
+                        <p className="font-bold text-xs sm:text-sm text-[#0B1B48] line-clamp-2 break-words leading-snug">
                           {spot.name}
                         </p>
                         {(() => {

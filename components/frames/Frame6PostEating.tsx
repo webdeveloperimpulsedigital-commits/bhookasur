@@ -82,7 +82,7 @@ export const Frame6PostEating: React.FC<Frame6PostEatingProps> = ({
         )}
         <video
           ref={videoRef}
-          src={withBasePath('/images/final-frames/Bhookasur-Imagining-About-Food.mp4')}
+          src={withBasePath('/images/final-frames/Food-Around-Bhookasur.mp4')}
           autoPlay
           loop
           muted

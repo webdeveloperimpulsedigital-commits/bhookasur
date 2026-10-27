@@ -512,7 +512,7 @@ export const BakasurVideoPlayer: React.FC<BakasurVideoPlayerProps> = ({
     else if (frameNumber === 6) src = '/images/all-frames/Showing Love.mp4';
     else if (frameNumber === 7 || frameNumber === 8 || isHeartburn) src = '/images/final-frames/Acidity-and-Dakare.mp4';
     else if (frameNumber === 9) src = '/images/final-frames/Bhookasur-Drinking-Gastrium.mp4';
-    else if (frameNumber === 10) src = '/images/all-frames/Thumbs Up.mp4';
+    else if (frameNumber === 10) src = '/images/final-frames/Bhookasur-Showing-Heart.mp4';
     else if (frameNumber === 11) src = '/images/all-frames/Showing Love.mp4';
     else if (frameNumber === 12) src = '/images/all-frames/Showing Love.mp4';
     else if (frameNumber === 13) src = '/images/all-frames/Thumbs Up.mp4';
@@ -527,6 +527,8 @@ export const BakasurVideoPlayer: React.FC<BakasurVideoPlayerProps> = ({
     if (frameNumber === 3 || frameNumber === 4) return '/images/final-frames/3_poster.jpg';
     if (frameNumber === 5) return '/images/final-frames/5_poster.jpg';
     if (frameNumber === 7 || frameNumber === 8 || isHeartburn) return '/images/final-frames/Acidity-and-Dakare_poster.jpg';
+    if (frameNumber === 9) return '/images/final-frames/Bhookasur-Drinking-Gastrium_poster.jpg';
+    if (frameNumber === 10) return '/images/final-frames/thank-you-frame.jpg';
     return '/images/final-frames/1_poster.jpg';
   }, [frameNumber, isHeartburn, posterImage]);
 
@@ -603,58 +605,48 @@ export const BakasurVideoPlayer: React.FC<BakasurVideoPlayerProps> = ({
       </div>
 
       {/* Main Stage Media Render */}
-      {frameNumber === 10 ? (
-        <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#062c97]">
-          <img
-            src={withBasePath('/images/final-frames/thank-you-frame.jpg')}
-            alt="Bhookasur Shukriya"
-            className="w-full h-full object-contain object-center relative z-10"
-          />
-        </div>
-      ) : (
-        <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#182858]">
-          <video
-            ref={videoRef}
-            key={activeVideoSrc}
-            src={activeVideoSrc}
-            poster={withBasePath(activePosterSrc)}
-            playsInline
-            autoPlay
-            loop
-            muted={!soundEnabled}
-            preload="auto"
-            onLoadedData={() => {
-              if (videoRef.current) {
-                videoRef.current.play().catch(() => {});
+      <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#182858]">
+        <video
+          ref={videoRef}
+          key={activeVideoSrc}
+          src={activeVideoSrc}
+          poster={withBasePath(activePosterSrc)}
+          playsInline
+          autoPlay
+          loop
+          muted={!soundEnabled}
+          preload="auto"
+          onLoadedData={() => {
+            if (videoRef.current) {
+              videoRef.current.play().catch(() => {});
+            }
+          }}
+          onCanPlay={() => {
+            if (videoRef.current) {
+              videoRef.current.play().catch(() => {});
+            }
+          }}
+          onError={() => {
+            if (videoRef.current && !videoRef.current.src.includes('1.mp4')) {
+              videoRef.current.src = withBasePath('/images/final-frames/1.mp4');
+              videoRef.current.load();
+              videoRef.current.play().catch(() => {});
+            }
+          }}
+          onTimeUpdate={(e) => {
+            if (frameNumber === 9) {
+              const video = e.currentTarget;
+              if (video.currentTime >= 3.8) {
+                window.dispatchEvent(new CustomEvent('gastrium-stomach-revealed'));
               }
-            }}
-            onCanPlay={() => {
-              if (videoRef.current) {
-                videoRef.current.play().catch(() => {});
-              }
-            }}
-            onError={() => {
-              if (videoRef.current && !videoRef.current.src.includes('1.mp4')) {
-                videoRef.current.src = withBasePath('/images/final-frames/1.mp4');
-                videoRef.current.load();
-                videoRef.current.play().catch(() => {});
-              }
-            }}
-            onTimeUpdate={(e) => {
-              if (frameNumber === 9) {
-                const video = e.currentTarget;
-                if (video.currentTime >= 3.8) {
-                  window.dispatchEvent(new CustomEvent('gastrium-stomach-revealed'));
-                }
-              }
-            }}
-            className="w-full h-full object-cover object-top relative z-10"
-          />
-          {(frameNumber === 7 || frameNumber === 8 || isHeartburn) && (
-            <div className="absolute inset-0 bg-gradient-to-t from-red-600/40 via-orange-600/20 to-transparent pointer-events-none z-20 animate-flame-volcano" />
-          )}
-        </div>
-      )}
+            }
+          }}
+          className="w-full h-full object-cover object-top relative z-10"
+        />
+        {(frameNumber === 7 || frameNumber === 8 || isHeartburn) && (
+          <div className="absolute inset-0 bg-gradient-to-t from-red-600/40 via-orange-600/20 to-transparent pointer-events-none z-20 animate-flame-volcano" />
+        )}
+      </div>
     </div>
   );
 };

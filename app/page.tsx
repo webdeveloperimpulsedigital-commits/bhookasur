@@ -829,8 +829,8 @@ export default function CampaignPage() {
               }}
               onWatchVideo={() => {
                 setActiveTransitionVideo({
-                  videoUrl: '/images/final-frames/Bhookasur-Food-Eating.mp4',
-                  desktopVideoUrl: '/images/final-frames/Bhookasur-Food-Eating-dekstop.mp4',
+                  videoUrl: withBasePath('/images/final-frames/Bhookasur-Food-Eating.mp4'),
+                  desktopVideoUrl: withBasePath('/images/final-frames/Bhookasur-Food-Eating-desktop.mp4'),
                   buttonText: 'Aage Badho ➡️',
                   nextFrame: 7
                 });
@@ -854,8 +854,8 @@ export default function CampaignPage() {
               onBack={() => setCurrentFrame(5)}
               onWatchVideo={() => {
                 setActiveTransitionVideo({
-                  videoUrl: '/images/final-frames/Bhookasur-Food-Eating.mp4',
-                  desktopVideoUrl: '/images/final-frames/Bhookasur-Food-Eating-dekstop.mp4',
+                  videoUrl: withBasePath('/images/final-frames/Bhookasur-Food-Eating.mp4'),
+                  desktopVideoUrl: withBasePath('/images/final-frames/Bhookasur-Food-Eating-desktop.mp4'),
                   buttonText: 'Aage Badho ➡️',
                   nextFrame: 7
                 });
@@ -866,8 +866,8 @@ export default function CampaignPage() {
               onBack={() => setCurrentFrame(5)}
               onWatchVideo={() => {
                 setActiveTransitionVideo({
-                  videoUrl: '/images/final-frames/Bhookasur-Food-Eating.mp4',
-                  desktopVideoUrl: '/images/final-frames/Bhookasur-Food-Eating-dekstop.mp4',
+                  videoUrl: withBasePath('/images/final-frames/Bhookasur-Food-Eating.mp4'),
+                  desktopVideoUrl: withBasePath('/images/final-frames/Bhookasur-Food-Eating-desktop.mp4'),
                   buttonText: 'Aage Badho ➡️',
                   nextFrame: 7
                 });
@@ -998,7 +998,7 @@ export default function CampaignPage() {
                           : currentFrame === 9
                             ? "/images/final-frames/Bhookasur-Drinking-Gastrium.mp4"
                             : currentFrame === 10
-                              ? "/images/all-frames/Thumbs Up.mp4"
+                              ? "/images/final-frames/Bhookasur-Showing-Heart.mp4"
                               : currentFrame === 12
                                 ? "/images/all-frames/Showing Love.mp4"
                                 : "/images/final-frames/1.mp4"

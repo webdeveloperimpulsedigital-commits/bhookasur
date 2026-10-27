@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
+import { withBasePath } from '@/lib/basePath';
 
 interface VideoTransitionOverlayProps {
   videoUrl: string;
@@ -14,13 +15,15 @@ interface VideoTransitionOverlayProps {
 export const VideoTransitionOverlay: React.FC<VideoTransitionOverlayProps> = ({
   videoUrl,
   desktopVideoUrl,
+  buttonText,
   onComplete,
-  soundEnabled
+  soundEnabled,
+  onToggleSound
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
-  const [currentSrc, setCurrentSrc] = useState<string>(videoUrl);
+  const [currentSrc, setCurrentSrc] = useState<string>(() => withBasePath(videoUrl));
 
   useEffect(() => {
     const updateSrc = () => {
@@ -32,7 +35,7 @@ export const VideoTransitionOverlay: React.FC<VideoTransitionOverlayProps> = ({
         if (desktopVideoUrl) {
           targetSrc = desktopVideoUrl;
         } else if (videoUrl.includes('Bhookasur-Food-Eating')) {
-          targetSrc = '/images/final-frames/Bhookasur-Food-Eating-dekstop.mp4';
+          targetSrc = '/images/final-frames/Bhookasur-Food-Eating-desktop.mp4';
         }
       } else {
         // Mobile: Prefer optimized lightweight 2.3 MB video over the heavy 12.7 MB export
@@ -40,7 +43,7 @@ export const VideoTransitionOverlay: React.FC<VideoTransitionOverlayProps> = ({
           targetSrc = '/images/final-frames/Bhookasur-Food-Eating.mp4';
         }
       }
-      setCurrentSrc(targetSrc);
+      setCurrentSrc(withBasePath(targetSrc));
     };
 
     updateSrc();
@@ -126,12 +129,13 @@ export const VideoTransitionOverlay: React.FC<VideoTransitionOverlayProps> = ({
             if (!isVideoLoaded) setIsVideoLoaded(true);
           }}
           onError={() => {
-            if (videoRef.current && !videoRef.current.src.includes('Bhookasur-Food-Eating.mp4')) {
-              videoRef.current.src = '/images/final-frames/Bhookasur-Food-Eating.mp4';
+            console.error('VideoTransitionOverlay error loading:', currentSrc);
+            const fallbackSrc = withBasePath('/images/final-frames/Bhookasur-Food-Eating.mp4');
+            if (videoRef.current && currentSrc !== fallbackSrc) {
+              setCurrentSrc(fallbackSrc);
               videoRef.current.load();
               videoRef.current.play().catch(() => {});
             } else {
-              // If completely unplayable, don't trap user
               handleAction();
             }
           }}
@@ -143,3 +147,4 @@ export const VideoTransitionOverlay: React.FC<VideoTransitionOverlayProps> = ({
     </div>
   );
 };
+

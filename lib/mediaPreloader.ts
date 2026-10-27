@@ -40,19 +40,19 @@ export const FRAME_MEDIA_DEPENDENCIES: Record<number, string[]> = {
   ],
   6: [
     '/images/final-frames/Acidity-and-Dakare.mp4',
-    '/images/final-frames/Bhookasur-Imagining-About-Food.mp4',
+    '/images/final-frames/Food-Around-Bhookasur.mp4',
     '/images/all-frames/Showing Love.mp4'
   ],
   7: [
     '/images/final-frames/Bhookasur-Drinking-Gastrium.mp4',
-    '/images/final-frames/thank-you-frame.jpg'
+    '/images/final-frames/Bhookasur-Showing-Heart.mp4'
   ],
   8: [
     '/images/final-frames/Bhookasur-Drinking-Gastrium.mp4',
-    '/images/final-frames/thank-you-frame.jpg'
+    '/images/final-frames/Bhookasur-Showing-Heart.mp4'
   ],
   9: [
-    '/images/final-frames/thank-you-frame.jpg',
+    '/images/final-frames/Bhookasur-Showing-Heart.mp4',
     '/images/all-frames/Showing Love.mp4'
   ],
   10: [
