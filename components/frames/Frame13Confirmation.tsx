@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Camera, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import type { Restaurant, Dish } from '@/lib/db';
 import { BakasurShareCardModal } from '../BakasurShareCardModal';
 import { withBasePath } from '@/lib/basePath';
@@ -56,16 +56,13 @@ export const Frame13Confirmation: React.FC<Frame13ConfirmationProps> = ({
 
           {/* Subtitle */}
           <p className="text-xs sm:text-[13px] md:text-base font-semibold text-[#0B1B48]/85 max-w-xs sm:max-w-md leading-snug mt-0.5">
-            Agar select hue, Live Food Tour ka bulaava isi registered number par aayega.
+            Get a chance to win Zomato voucher! Details isi registered number par aayengi.
           </p>
 
           {/* Registered Details Pill */}
           {mobile && (
-            <div className="mt-1 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-[#0B1B48] font-bold text-[11px] sm:text-xs border border-slate-200 shadow-2xs">
+            <div className="mt-1 inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-slate-100 text-[#0B1B48] font-bold text-[11px] sm:text-xs border border-slate-200 shadow-2xs">
               <span>📱 +91 {mobile}</span>
-              {participationId && (
-                <span className="text-[#D4380D] font-mono font-black">[{participationId}]</span>
-              )}
             </div>
           )}
         </div>
@@ -86,10 +83,9 @@ export const Frame13Confirmation: React.FC<Frame13ConfirmationProps> = ({
           <button
             onClick={() => setIsShareModalOpen(true)}
             type="button"
-            className="w-full py-2.5 sm:py-3 px-6 rounded-2xl bg-[#071952] hover:bg-[#0a2370] text-amber-300 font-black text-xs sm:text-sm uppercase tracking-wider shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer border border-amber-400/40"
+            className="w-full py-2.5 sm:py-3 px-6 rounded-2xl bg-[#071952] hover:bg-[#0a2370] text-amber-300 font-black text-xs sm:text-sm uppercase tracking-wider shadow-md active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer border border-amber-400/40"
           >
-            <Camera className="w-4 h-4 text-amber-400" />
-            <span>SHARE INSTAGRAM / WHATSAPP CARD 📸</span>
+            <span>SHARE INSTAGRAM / WHATSAPP CARD</span>
           </button>
 
           {/* Footer Subtext: POWERED BY GASTRIUM */}
