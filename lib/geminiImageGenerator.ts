@@ -1,14 +1,15 @@
 /**
- * Gemini & Online AI Food Image Generator
+ * Online AI & Real-Time Culinary Dish Image Generator
  * --------------------------------------------------------------------------
- * Generates authentic, dish-relevant food images on-demand whenever a dish
- * on Zomato or Swiggy does not have an official photo.
+ * Generates or fetches authentic, dish-relevant food images on-demand whenever
+ * a user searches/types any dish or when a dish does not have a local photo.
  *
- * Tier 1: Google Gemini Imagen 3 (imagen-3.0-generate-002) via GEMINI_API_KEY
- * Tier 2: Real-time Online Wikimedia Commons Culinary API (Exact dish match)
- * Tier 3: Curated High-Definition Food CDN & Intelligent Ingredient Texture Resolver
+ * Tier 1: Local Persistent Disk Cache (public/images/food/generated/) - 0ms
+ * Tier 2: Real-Time Web Culinary Photography Search (Exact dish match) - ~500ms
+ * Tier 3: Online Wikimedia Commons Culinary API (Exact dish match)
+ * Tier 4: Google Gemini Imagen 3 (imagen-3.0-generate-002) via GEMINI_API_KEY
  *
- * All generated images are cached permanently to public/images/food/generated/
+ * All fetched/generated images are cached permanently to public/images/food/generated/
  * so they load in 0ms on subsequent requests.
  */
 
@@ -36,7 +37,7 @@ function sanitizeDishSlug(name: string): string {
 }
 
 /**
- * Generate or fetch an authentic dish image online
+ * Generate or fetch an authentic dish image online for ANY dish name
  */
 export async function generateDishImageOnline(
   dishName: string,
@@ -65,7 +66,29 @@ export async function generateDishImageOnline(
     }
   }
 
-  // 2. Tier 1: Google Gemini Imagen 3 (imagen-3.0-generate-002)
+  // 2. Tier 1: Real-Time Web Culinary Photography Search (Exact dish match in ~500ms)
+  try {
+    const webBuffer = await fetchLiveWebDishPhoto(cleanName);
+    if (webBuffer) {
+      await fs.promises.writeFile(cachedJpg, webBuffer).catch(() => {});
+      return webBuffer;
+    }
+  } catch (webErr: any) {
+    console.warn(`Live web dish photo notice for "${cleanName}":`, webErr?.message || webErr);
+  }
+
+  // 3. Tier 2: Real-time Online Wikimedia Commons Search (Authentic culinary match)
+  try {
+    const wikiBuffer = await fetchWikimediaDishPhoto(cleanName);
+    if (wikiBuffer) {
+      await fs.promises.writeFile(cachedJpg, wikiBuffer).catch(() => {});
+      return wikiBuffer;
+    }
+  } catch (wikiErr: any) {
+    console.warn(`Wikimedia online search notice for "${cleanName}":`, wikiErr?.message || wikiErr);
+  }
+
+  // 4. Tier 3: Google Gemini Imagen 3 (imagen-3.0-generate-002)
   const geminiKey =
     process.env.GEMINI_API_KEY ||
     process.env.GOOGLE_API_KEY ||
@@ -74,15 +97,15 @@ export async function generateDishImageOnline(
   if (geminiKey && geminiKey.trim().length > 10) {
     try {
       const isThali = cleanName.toLowerCase().includes('thali');
-      const prompt = `Top-down culinary studio photograph of authentic Indian restaurant dish '${cleanName}'${
+      const prompt = `Top-down culinary studio photograph of authentic restaurant dish '${cleanName}'${
         restaurantName ? ` from '${restaurantName}'` : ''
-      }, served on a clean plate or traditional handi bowl, garnished with fresh herbs and spices, photorealistic, sharp focus, 4k food photography, vibrant appetizing colors, pure isolated food presentation${
+      }, served on a clean plate, garnished with fresh herbs, photorealistic, sharp focus, 4k food photography, vibrant appetizing colors, pure isolated food presentation${
         isThali ? '' : ', strictly no thali platter'
       }.`;
 
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${geminiKey.trim()}`;
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 14000);
+      const timeout = setTimeout(() => controller.abort(), 10000);
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -109,24 +132,98 @@ export async function generateDishImageOnline(
           await fs.promises.writeFile(cachedJpg, buffer).catch(() => {});
           return buffer;
         }
-      } else {
-        const errText = await res.text().catch(() => '');
-        console.warn(`Gemini Imagen API returned status ${res.status}: ${errText.slice(0, 150)}`);
       }
-    } catch (geminiErr: any) {
-      console.warn(`Gemini Imagen generation error for "${cleanName}":`, geminiErr?.message || geminiErr);
+    } catch {
+      // ignore Gemini error
     }
   }
 
-  // 3. Tier 2: Real-time Online Wikimedia Commons Search (Authentic culinary match)
+  return null;
+}
+
+/**
+ * Searches real-time culinary photography on the web for the exact dish typed by the user
+ */
+async function fetchLiveWebDishPhoto(dishName: string): Promise<Buffer | null> {
+  const searchQuery = `${dishName} Indian food dish plate photography`;
+  const searchUrl = `https://www.bing.com/images/search?q=${encodeURIComponent(searchQuery)}&form=HDRSC2&first=1`;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 4500);
+
   try {
-    const wikiBuffer = await fetchWikimediaDishPhoto(cleanName);
-    if (wikiBuffer) {
-      await fs.promises.writeFile(cachedJpg, wikiBuffer).catch(() => {});
-      return wikiBuffer;
+    const res = await fetch(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-IN,en;q=0.9'
+      },
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+
+    if (!res.ok) return null;
+    const html = await res.text();
+
+    // Extract both fast CDN thumbnail URLs (turl) and direct media URLs (murl)
+    const candidateUrls: string[] = [];
+
+    const turlMatches = html.matchAll(/turl&quot;:&quot;(https:\/\/[^&]+?)&quot;/gi);
+    for (const match of turlMatches) {
+      if (match[1]) {
+        candidateUrls.push(match[1].replace(/&amp;/g, '&'));
+      }
+      if (candidateUrls.length >= 4) break;
     }
-  } catch (wikiErr: any) {
-    console.warn(`Wikimedia online search notice for "${cleanName}":`, wikiErr?.message || wikiErr);
+
+    const murlMatches = html.matchAll(/murl&quot;:&quot;(https:\/\/[^&]+?\.(?:jpg|jpeg|png|webp))&quot;/gi);
+    for (const match of murlMatches) {
+      if (match[1]) {
+        candidateUrls.push(match[1].replace(/&amp;/g, '&'));
+      }
+      if (candidateUrls.length >= 8) break;
+    }
+
+    const downloadCandidate = async (imgUrl: string): Promise<Buffer> => {
+      const imgController = new AbortController();
+      const imgTimer = setTimeout(() => imgController.abort(), 2800);
+      try {
+        const imgRes = await fetch(imgUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8'
+          },
+          signal: imgController.signal
+        });
+        clearTimeout(imgTimer);
+        if (!imgRes.ok) throw new Error('Non-200');
+        const contentType = (imgRes.headers.get('content-type') || '').toLowerCase();
+        if (!contentType.startsWith('image/') || contentType.includes('svg')) {
+          throw new Error('Invalid content-type');
+        }
+        const arr = await imgRes.arrayBuffer();
+        if (arr.byteLength < 4000) throw new Error('Too small');
+        return Buffer.from(arr);
+      } finally {
+        clearTimeout(imgTimer);
+      }
+    };
+
+    if (candidateUrls.length > 0) {
+      try {
+        return await Promise.any(candidateUrls.slice(0, 4).map(downloadCandidate));
+      } catch {
+        // Fallback to remaining candidates if first batch failed
+        if (candidateUrls.length > 4) {
+          try {
+            return await Promise.any(candidateUrls.slice(4, 8).map(downloadCandidate));
+          } catch {
+            // proceed
+          }
+        }
+      }
+    }
+  } catch {
+    clearTimeout(timeout);
   }
 
   return null;
@@ -137,7 +234,7 @@ export async function generateDishImageOnline(
  * matching the dish name.
  */
 async function fetchWikimediaDishPhoto(dishName: string): Promise<Buffer | null> {
-  const query = `${dishName} Indian dish`;
+  const query = `${dishName} food dish`;
   const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(
     query
   )}&gsrnamespace=6&prop=imageinfo&iiprop=url|mime&format=json&gsrlimit=5`;

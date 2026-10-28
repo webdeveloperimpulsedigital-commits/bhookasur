@@ -78,6 +78,7 @@ export interface SwiggyDishItem {
 
 export function getApifyToken(): string {
   // Server-only secret. Never read a NEXT_PUBLIC_* variant: those are inlined into browser JavaScript.
+  try { const fs = require('fs'), path = require('path'), p = path.join(process.cwd(), '.env.local'); if (fs.existsSync(p)) { const m = fs.readFileSync(p, 'utf8').match(/^\s*APIFY_TOKEN\s*=\s*(.+?)\s*$/m); if (m?.[1]) return m[1].replace(/^["']|["']$/g, '').trim(); } } catch {}
   return (
     process.env.APIFY_TOKEN ||
     process.env.APIFY_API_KEY ||

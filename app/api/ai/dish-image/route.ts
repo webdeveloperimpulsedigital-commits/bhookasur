@@ -8,7 +8,7 @@ import { generateDishImageOnline } from '@/lib/geminiImageGenerator';
 export const dynamic = 'force-dynamic';
 
 // Cache key salt to instantly bust any previous stale in-memory cached buffers
-const CACHE_VERSION = 'v48_dhokla_canonical_fix';
+const CACHE_VERSION = 'v53_live_dish_photo_fix';
 const imageBufferCache = new Map<string, { buffer: Buffer; contentType: string; timestamp: number }>();
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -448,10 +448,6 @@ const CANONICAL_LOCAL_ASSETS: Record<string, string> = {
   // Snacks & Breakfast
   upma: 'poha.jpg',
   dabeli: 'vada_pav.jpg',
-  white_sauce_pasta: 'garlic_bread.jpg',
-  red_sauce_pasta: 'margherita_pizza.jpg',
-  pink_sauce_pasta: 'margherita_pizza.jpg',
-  lasagna: 'farmhouse_pizza.jpg',
   chicken_seekh_kebab: 'non_veg_platter.jpg',
   mutton_seekh_kebab: 'non_veg_platter.jpg',
   veg_seekh_kebab: 'veg_platter.jpg',
@@ -460,8 +456,6 @@ const CANONICAL_LOCAL_ASSETS: Record<string, string> = {
   fish_tikka: 'fish_fry.jpg',
   prawn_fry: 'fish_fry.jpg',
   butter_garlic_prawns: 'fish_fry.jpg',
-  pancakes: 'shrikhand_puri.jpg',
-  waffles: 'chocolate_ice_cream.jpg',
   french_toast: 'sandwich.jpg',
   bread_omelette: 'tomato_omelette.jpg',
   cheese_omelette: 'tomato_omelette.jpg',
@@ -477,21 +471,7 @@ const CANONICAL_LOCAL_ASSETS: Record<string, string> = {
   aloo_gobi: 'batata_bhaji.jpg',
   baingan_bharta: 'bharli_vangi.jpg',
   kadhi_pakora: 'katachi_amti.jpg',
-  tomato_soup: 'katachi_amti.jpg',
-  soup: 'katachi_amti.jpg',
-  caesar_salad: 'kothimbir_vadi.jpg',
-  greek_salad: 'kothimbir_vadi.jpg',
-  garden_salad: 'kothimbir_vadi.jpg',
-  salad: 'kothimbir_vadi.jpg',
-  gajar_halwa: 'ladoo.jpg',
-  cake: 'mango_barfi.jpg',
-  pastries: 'mango_barfi.jpg',
-  brownie: 'death_by_chocolate.jpg',
-  cheesecake: 'barfi.jpg',
-  muffins: 'ladoo.jpg',
-  donuts: 'medu_vada.jpg',
-  cookies: 'bhakarwadi.jpg',
-  croissant: 'butter_naan.jpg'
+  brownie: 'death_by_chocolate.jpg'
 };
 
 // Remote verified CDN fallbacks for beverages, specialties, and network redundancy
@@ -2025,57 +2005,9 @@ function matchDishToCanonicalKey(dishName: string, restaurantName: string = ''):
     return 'thali';
   }
 
-  // Restaurant Context Sensitivity
-  if (r.includes('biryani')) return 'biryani';
-  if (r.includes('seafood') || r.includes('fish') || r.includes('malvan')) return 'fish_fry';
-  if (r.includes('mutton') || r.includes('military') || r.includes('maratha')) return 'mutton_curry';
-  if (r.includes('mithai') || r.includes('sweet') || r.includes('halwai') || r.includes('chitale')) return 'barfi';
-  if (r.includes('mastani') || r.includes('sujata')) {
-    if (d.includes('falooda') || d.includes('faluda')) return 'falooda';
-    if (d.includes('kulfi')) return 'kulfi';
-    if (d.includes('kesar') || d.includes('pista')) return 'kesar_pista_mastani';
-    if (d.includes('chocolate') || d.includes('brownie')) return 'chocolate_mastani';
-    if (d.includes('strawberry')) return 'strawberry_mastani';
-    if (d.includes('sitaphal')) return 'sitaphal_mastani';
-    if (d.includes('anjir') || d.includes('badam') || d.includes('dryfruit')) return 'dryfruit_mastani';
-    if (d.includes('rose') || d.includes('gulkand')) return 'rose_mastani';
-    if (d.includes('butterscotch')) return 'butterscotch_mastani';
-    return 'mango_mastani';
-  }
-  if (r.includes('ice cream') || r.includes('naturals') || r.includes('corner house') || r.includes('havmor') || r.includes('baskin') || r.includes('kulfi') || r.includes('kawre') || r.includes('cream stone') || r.includes('apsara')) {
-    if (d.includes('tender coconut') || d.includes('coconut')) return 'tender_coconut_ice_cream';
-    if (d.includes('sitaphal')) return 'sitaphal_ice_cream';
-    if (d.includes('kesar') || d.includes('pista')) return 'kesar_pista_ice_cream';
-    if (d.includes('mango') || d.includes('alphonso')) return 'mango_ice_cream';
-    if (d.includes('strawberry')) return 'strawberry_ice_cream';
-    if (d.includes('black currant') || d.includes('currant')) return 'black_currant_ice_cream';
-    if (d.includes('butterscotch')) return 'butterscotch_ice_cream';
-    if (d.includes('coffee') || d.includes('mocha')) return 'coffee_ice_cream';
-    if (d.includes('kaju') || d.includes('draksh')) return 'kaju_draksh_ice_cream';
-    if (d.includes('chocolate') || d.includes('brownie') || d.includes('dbc')) return 'death_by_chocolate';
-    if (d.includes('kulfi')) return 'kulfi';
-    if (d.includes('falooda')) return 'falooda';
-    return 'vanilla_ice_cream';
-  }
-  if (r.includes('kfc') || r.includes('kentucky')) {
-    if (d.includes('burger') || d.includes('zinger')) return 'zinger_burger';
-    if (d.includes('popcorn')) return 'chicken_popcorn';
-    if (d.includes('strip') || d.includes('tender')) return 'chicken_strips';
-    if (d.includes('wing')) return 'chicken_wings';
-    if (d.includes('fries')) return 'fries';
-    return 'kfc_fried_chicken';
-  }
-  if (r.includes('pizza') || r.includes('pizzeria') || r.includes('domino') || r.includes('la pinoz') || r.includes('ovenstory') || r.includes('fire')) {
-    if (d.includes('garlic') || d.includes('bread')) return 'garlic_bread';
-    if (d.includes('margherita')) return 'margherita_pizza';
-    if (d.includes('paneer')) return 'paneer_pizza';
-    if (d.includes('chicken')) return 'chicken_pizza';
-    if (d.includes('farmhouse')) return 'farmhouse_pizza';
-    return 'wood_fired_pizza';
-  }
-
-  // Intelligent context-aware culinary category fallback
-  return inferCulinaryCategory(dishName, restaurantName);
+  // For any dish not explicitly matched above (e.g. Veg Puff, Egg Puff, Ramen, Sushi, Mawa Cake, Shawarma, etc.),
+  // return '__custom_dish__' so getRawFoodImageBuffer fetches/generates the real photo of that exact dish online!
+  return '__custom_dish__';
 }
 
 function resolveDishPhotoUrl(dishName: string, restaurantName: string = ''): string {
