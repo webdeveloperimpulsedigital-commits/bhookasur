@@ -46,3 +46,15 @@ next-env.d.ts
 
 # temporary scratch & debug
 /scratch/
+
+# dynamic food images cache (generated at runtime)
+public/images/food/generated/*
+!public/images/food/generated/cheese_maggi.jpg
+!public/images/food/generated/club_sandwich.jpg
+!public/images/food/generated/egg_puff.jpg
+!public/images/food/generated/mawa_cake.jpg
+!public/images/food/generated/paneer_chilli.jpg
+!public/images/food/generated/rabri.jpg
+!public/images/food/generated/veg_biryani.jpg
+!public/images/food/generated/veg_manchurian.jpg
+!public/images/food/generated/veg_puff.jpg
