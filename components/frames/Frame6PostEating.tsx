@@ -62,6 +62,7 @@ export const Frame6PostEating: React.FC<Frame6PostEatingProps> = ({
     <div className="w-full h-full flex flex-col lg:flex-row bg-[#07153B] overflow-hidden relative">
       {onBack && (
         <button
+          id="btn-frame6-post-back"
           onClick={onBack}
           type="button"
           className="absolute top-3 left-3 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/80 text-white font-black text-xs backdrop-blur-md border border-white/20 shadow-lg transition-all transform active:scale-95 cursor-pointer"
@@ -112,6 +113,7 @@ export const Frame6PostEating: React.FC<Frame6PostEatingProps> = ({
         {/* Primary CTA Button */}
         <div className="w-full max-w-md mx-auto pt-2 pb-1 md:pb-4 flex flex-col gap-2.5 sm:gap-3">
           <button
+            id="btn-frame6-post-watch-video"
             onClick={onWatchVideo}
             type="button"
             className="w-full py-3.5 xs:py-4 sm:py-4 px-6 rounded-2xl bg-[#D4380D] hover:bg-[#ba300a] active:bg-[#a12908] text-white font-black text-base xs:text-lg sm:text-xl uppercase tracking-wider shadow-lg shadow-[#D4380D]/30 active:scale-[0.98] transition-all cursor-pointer border-0"

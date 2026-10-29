@@ -107,6 +107,7 @@ export const Frame6RandomFoodSpot: React.FC<Frame6RandomFoodSpotProps> = ({
         {onBack && (
           <div className="absolute top-3 left-3 z-30 pointer-events-auto">
             <button
+              id="btn-frame6-random-back"
               onClick={(e) => {
                 e.stopPropagation();
                 onBack();
@@ -172,6 +173,7 @@ export const Frame6RandomFoodSpot: React.FC<Frame6RandomFoodSpotProps> = ({
             <div className="w-full space-y-2 animate-in fade-in duration-200">
               {/* Action Button: Click to advance immediately */}
               <button
+                id="btn-frame6-random-aur-khilao"
                 onClick={(e) => {
                   e.stopPropagation();
                   onFeedMore();

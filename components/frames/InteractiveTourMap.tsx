@@ -647,6 +647,7 @@ export const InteractiveTourMap: React.FC<InteractiveTourMapProps> = ({
       {/* Floating Map Action Controls (Top-Right) */}
       <div className="absolute top-2.5 right-2.5 z-30 flex flex-col gap-1.5 pointer-events-auto">
         <button
+          id="btn-map-zoom-user-spot"
           onClick={handleZoomToUser}
           type="button"
           title="Zoom to My Visited Spot"
@@ -657,6 +658,7 @@ export const InteractiveTourMap: React.FC<InteractiveTourMapProps> = ({
         </button>
 
         <button
+          id="btn-map-view-all-india"
           onClick={handleViewAllIndia}
           type="button"
           title="View All India Tour Spots"

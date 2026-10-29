@@ -536,6 +536,7 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
 
                   return (
                     <button
+                      id={`btn-frame3-quick-dish-${dish.id || dish.name.toLowerCase().replace(/\s+/g, '-')}`}
                       key={`quick-${dish.id}-${dish.name}`}
                       type="button"
                       onClick={() => handleSelectDishItem(dish)}
@@ -585,6 +586,7 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
                 />
                 {menuSearchQuery && (
                   <button
+                    id="btn-frame3-clear-search"
                     type="button"
                     onClick={() => setMenuSearchQuery('')}
                     className="p-1 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
@@ -675,6 +677,7 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
                         {/* Select Button */}
                         <div className="flex items-center shrink-0">
                           <button
+                            id={`btn-frame3-select-dish-${dish.id || dish.name.toLowerCase().replace(/\s+/g, '-')}`}
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -706,6 +709,7 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
           {/* 4. Primary CTA Button */}
           <div className="shrink-0 w-full pt-0.5">
             <button
+              id="btn-frame3-confirm-dish"
               onClick={handleConfirm}
               type="button"
               className="w-full py-3 sm:py-3.5 px-6 rounded-xl sm:rounded-2xl bg-[#D4380D] hover:bg-[#ba300a] text-white font-black text-sm sm:text-base uppercase tracking-wider shadow-lg shadow-[#D4380D]/30 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer border-0"

@@ -108,6 +108,7 @@ export const Frame12Registration: React.FC<Frame12RegistrationProps> = ({
       {/* Top Section: Back Button */}
       <div className="shrink-0 flex items-center justify-start gap-2">
         <button
+          id="btn-frame12-back-to-map"
           onClick={onBack}
           type="button"
           className="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 cursor-pointer"
@@ -199,6 +200,7 @@ export const Frame12Registration: React.FC<Frame12RegistrationProps> = ({
             </div>
             {onViewExistingPass && registeredInfo.participation_id && (
               <button
+                id="btn-frame12-view-existing-pass"
                 type="button"
                 onClick={() => onViewExistingPass({ mobile: mobile.slice(-10), participation_id: registeredInfo.participation_id! })}
                 className="w-full py-2 px-3 rounded-xl bg-[#0B1B48] text-amber-300 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2"
@@ -233,6 +235,7 @@ export const Frame12Registration: React.FC<Frame12RegistrationProps> = ({
       {/* Primary CTA: Mera naam jodo */}
       <div className="shrink-0 pt-1">
         <button
+          id="btn-frame12-submit-registration"
           onClick={handleSubmit}
           disabled={isLoading || isChecking || mobile.length !== 10 || registeredInfo?.isRegistered}
           type="button"

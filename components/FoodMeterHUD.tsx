@@ -138,6 +138,7 @@ export const FoodMeterHUD: React.FC<FoodMeterHUDProps> = ({
       {/* Interactive Action CTA Button */}
       <div className="mt-1">
         <button
+          id="btn-food-meter-action"
           onClick={handleActionClick}
           disabled={isLoading}
           type="button"

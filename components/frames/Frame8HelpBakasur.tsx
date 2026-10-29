@@ -20,6 +20,7 @@ export const Frame8HelpBakasur: React.FC<Frame8HelpBakasurProps> = ({ onHelpBaka
       {/* Primary CTA: HELP BHOOKASUR */}
       <div className="shrink-0 w-full max-w-sm sm:max-w-md mx-auto pt-2 pb-2">
         <button
+          id="btn-frame8-help-bhookasur"
           onClick={onHelpBakasur}
           type="button"
           className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-[#D4380D] hover:bg-[#ba300a] active:bg-[#a12908] text-white font-black text-lg xs:text-xl sm:text-2xl uppercase tracking-wider shadow-lg shadow-[#D4380D]/30 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer border-0"

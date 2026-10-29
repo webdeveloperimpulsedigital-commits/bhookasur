@@ -71,6 +71,7 @@ export const Frame13Confirmation: React.FC<Frame13ConfirmationProps> = ({
         <div className="w-full flex flex-col items-center gap-2 sm:gap-2.5 shrink-0 pt-1 max-w-sm sm:max-w-md">
           {/* Primary CTA: BACK TO FOOD TOUR MAP */}
           <button
+            id="btn-frame13-back-to-map"
             onClick={onBackToMap}
             type="button"
             className="w-full py-3 sm:py-3.5 px-6 rounded-2xl bg-[#D4380D] hover:bg-[#ba300a] text-white font-black text-sm sm:text-base uppercase tracking-wider shadow-xl shadow-[#D4380D]/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
@@ -81,6 +82,7 @@ export const Frame13Confirmation: React.FC<Frame13ConfirmationProps> = ({
 
           {/* Secondary Share Button */}
           <button
+            id="btn-frame13-share-card"
             onClick={() => setIsShareModalOpen(true)}
             type="button"
             className="w-full py-2.5 sm:py-3 px-6 rounded-2xl bg-[#071952] hover:bg-[#0a2370] text-amber-300 font-black text-xs sm:text-sm uppercase tracking-wider shadow-md active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer border border-amber-400/40"

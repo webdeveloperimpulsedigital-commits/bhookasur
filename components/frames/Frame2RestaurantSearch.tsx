@@ -453,6 +453,7 @@ export const Frame2RestaurantSearch: React.FC<Frame2RestaurantSearchProps> = ({
             <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-[#1D4ED8] border-t-transparent rounded-full animate-spin shrink-0 mr-1.5" />
           ) : searchQuery ? (
             <button
+              id="btn-frame2-clear-search"
               type="button"
               onClick={() => {
                 setSearchQuery('');
@@ -481,6 +482,7 @@ export const Frame2RestaurantSearch: React.FC<Frame2RestaurantSearchProps> = ({
             {/* Spelling Correction Suggestion Banner */}
             {spellingSuggestion && spellingSuggestion.toLowerCase() !== searchQuery.toLowerCase().trim() && (
               <button
+                id="btn-frame2-spelling-suggestion"
                 type="button"
                 onClick={() => {
                   setSearchQuery(spellingSuggestion);
@@ -510,6 +512,7 @@ export const Frame2RestaurantSearch: React.FC<Frame2RestaurantSearchProps> = ({
 
                 return (
                   <button
+                    id={`btn-frame2-search-result-${idx}`}
                     key={`${spot.id}-${spot.name}-${idx}`}
                     type="button"
                     onClick={() => handleSelectSpot(spot)}
@@ -645,6 +648,7 @@ export const Frame2RestaurantSearch: React.FC<Frame2RestaurantSearchProps> = ({
       {/* 3. PRIMARY CTA BUTTON: YEH WALA PAKKA */}
       <div className="w-full shrink-0 mt-auto pt-2 flex flex-col gap-2">
         <button
+          id="btn-frame2-confirm-restaurant"
           onClick={handleConfirm}
           disabled={!selectedRestaurant && !searchQuery.trim()}
           type="button"

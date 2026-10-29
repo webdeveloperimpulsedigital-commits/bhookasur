@@ -289,6 +289,7 @@ export const BakasurShareCardModal: React.FC<BakasurShareCardModalProps> = ({
             </span>
           </div>
           <button
+            id="btn-share-modal-close"
             onClick={onClose}
             type="button"
             className="p-1.5 rounded-full bg-slate-200/80 hover:bg-slate-300 text-slate-700 transition-all cursor-pointer"
@@ -358,6 +359,7 @@ export const BakasurShareCardModal: React.FC<BakasurShareCardModalProps> = ({
           <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
             {/* WhatsApp */}
             <button
+              id="btn-share-modal-whatsapp"
               onClick={handleShareWhatsApp}
               type="button"
               className="py-3 px-3 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 shadow-[#25D366]/30"
@@ -368,6 +370,7 @@ export const BakasurShareCardModal: React.FC<BakasurShareCardModalProps> = ({
 
             {/* Instagram */}
             <button
+              id="btn-share-modal-instagram"
               onClick={handleShareInstagram}
               type="button"
               className="py-3 px-3 rounded-xl bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F77737] hover:opacity-95 text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 shadow-[#FD1D1D]/25"

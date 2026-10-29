@@ -88,6 +88,7 @@ export const RestaurantShareModal: React.FC<RestaurantShareModalProps> = ({
       <div className="w-full max-w-md bg-white rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-200 relative flex flex-col gap-4 animate-in zoom-in-95 duration-200 max-h-[92vh] overflow-y-auto">
         {/* Close Button */}
         <button
+          id="btn-restaurant-share-close"
           onClick={onClose}
           type="button"
           className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
@@ -127,6 +128,7 @@ export const RestaurantShareModal: React.FC<RestaurantShareModalProps> = ({
         <div className="grid grid-cols-2 gap-2.5">
           {/* WhatsApp Direct */}
           <button
+            id="btn-restaurant-share-whatsapp"
             onClick={handleShareWhatsApp}
             type="button"
             className="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-[#25D366] hover:bg-[#20ba59] text-white font-black text-xs uppercase tracking-wider shadow-md shadow-[#25D366]/30 active:scale-95 transition-all cursor-pointer border-0"
@@ -137,6 +139,7 @@ export const RestaurantShareModal: React.FC<RestaurantShareModalProps> = ({
 
           {/* Share to Chat (All Apps) */}
           <button
+            id="btn-restaurant-share-native"
             onClick={handleNativeShare}
             type="button"
             className="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-[#0047BA] hover:bg-[#003894] text-white font-black text-xs uppercase tracking-wider shadow-md shadow-[#0047BA]/30 active:scale-95 transition-all cursor-pointer border-0"
@@ -147,6 +150,7 @@ export const RestaurantShareModal: React.FC<RestaurantShareModalProps> = ({
 
           {/* Instagram Share */}
           <button
+            id="btn-restaurant-share-instagram"
             onClick={handleInstagramShare}
             type="button"
             className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F77737] hover:opacity-95 text-white font-black text-xs uppercase tracking-wider shadow-md active:scale-95 transition-all cursor-pointer border-0"
@@ -157,6 +161,7 @@ export const RestaurantShareModal: React.FC<RestaurantShareModalProps> = ({
 
           {/* Facebook Share */}
           <button
+            id="btn-restaurant-share-facebook"
             onClick={handleShareFacebook}
             type="button"
             className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-[#1877F2] hover:bg-[#1567d3] text-white font-black text-xs uppercase tracking-wider shadow-md active:scale-95 transition-all cursor-pointer border-0"
@@ -168,6 +173,7 @@ export const RestaurantShareModal: React.FC<RestaurantShareModalProps> = ({
 
         {/* Copy Message / Link Action */}
         <button
+          id="btn-restaurant-share-copy-link"
           onClick={handleCopyLink}
           type="button"
           className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer border border-slate-200"
@@ -188,6 +194,7 @@ export const RestaurantShareModal: React.FC<RestaurantShareModalProps> = ({
         {/* Divider & Continue Action */}
         <div className="pt-2 border-t border-slate-100 space-y-2">
           <button
+            id="btn-restaurant-share-continue"
             onClick={onContinue}
             type="button"
             className="w-full py-3.5 px-5 rounded-2xl bg-[#D4380D] hover:bg-[#ba300a] text-white font-black text-sm uppercase tracking-wider shadow-lg shadow-[#D4380D]/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
@@ -197,6 +204,7 @@ export const RestaurantShareModal: React.FC<RestaurantShareModalProps> = ({
           </button>
 
           <button
+            id="btn-restaurant-share-dismiss"
             onClick={onClose}
             type="button"
             className="text-xs text-slate-400 hover:text-slate-600 font-bold underline cursor-pointer"

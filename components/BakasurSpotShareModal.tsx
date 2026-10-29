@@ -162,6 +162,7 @@ export const BakasurSpotShareModal: React.FC<BakasurSpotShareModalProps> = ({
             </div>
 
             <button
+              id="btn-spot-share-close"
               onClick={onClose}
               type="button"
               className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer"
@@ -196,6 +197,7 @@ export const BakasurSpotShareModal: React.FC<BakasurSpotShareModalProps> = ({
             <div className="grid grid-cols-2 gap-2.5">
               {/* WhatsApp */}
               <button
+                id="btn-spot-share-whatsapp"
                 onClick={handleShareWhatsApp}
                 type="button"
                 className="py-3 px-3.5 rounded-2xl bg-[#25D366] hover:bg-[#20ba5a] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-[#25D366]/30 active:scale-95 transition-all cursor-pointer"
@@ -206,6 +208,7 @@ export const BakasurSpotShareModal: React.FC<BakasurSpotShareModalProps> = ({
 
               {/* Instagram Story / Card */}
               <button
+                id="btn-spot-share-instagram"
                 onClick={() => setIsStoryModalOpen(true)}
                 type="button"
                 className="py-3 px-3.5 rounded-2xl bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F77737] hover:opacity-95 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-[#FD1D1D]/25 active:scale-95 transition-all cursor-pointer"
@@ -216,6 +219,7 @@ export const BakasurSpotShareModal: React.FC<BakasurSpotShareModalProps> = ({
 
               {/* Facebook */}
               <button
+                id="btn-spot-share-facebook"
                 onClick={handleShareFacebook}
                 type="button"
                 className="py-3 px-3.5 rounded-2xl bg-[#1877F2] hover:bg-[#156cdb] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-[#1877F2]/30 active:scale-95 transition-all cursor-pointer"
@@ -226,6 +230,7 @@ export const BakasurSpotShareModal: React.FC<BakasurSpotShareModalProps> = ({
 
               {/* Share to Chat / More Apps */}
               <button
+                id="btn-spot-share-native"
                 onClick={handleNativeShare}
                 type="button"
                 className="py-3 px-3.5 rounded-2xl bg-[#0B1B48] hover:bg-[#122763] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-[#0B1B48]/30 active:scale-95 transition-all cursor-pointer"
@@ -238,6 +243,7 @@ export const BakasurSpotShareModal: React.FC<BakasurSpotShareModalProps> = ({
             {/* Copy Link / Full Message Option */}
             <div className="pt-1">
               <button
+                id="btn-spot-share-copy-link"
                 onClick={handleCopyLink}
                 type="button"
                 className={`w-full py-3 px-4 rounded-2xl border-2 font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer ${

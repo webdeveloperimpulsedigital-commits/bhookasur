@@ -24,6 +24,7 @@ export const Frame1Welcome: React.FC<Frame1WelcomeProps> = ({ onStart }) => {
       {/* 3. CTA Button: BHOOKASUR KO KHILAO -> */}
       <div className="shrink-0 w-full max-w-sm sm:max-w-md pt-1.5 sm:pt-3">
         <button
+          id="btn-frame1-start-tour"
           onClick={onStart}
           type="button"
           className="w-full py-3.5 sm:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl bg-[#D4380D] hover:bg-[#ba300a] text-white font-black text-sm xs:text-base sm:text-lg md:text-xl uppercase tracking-wider shadow-lg shadow-[#D4380D]/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 sm:gap-2.5 cursor-pointer border-0 whitespace-nowrap"
@@ -35,5 +36,3 @@ export const Frame1Welcome: React.FC<Frame1WelcomeProps> = ({ onStart }) => {
     </div>
   );
 };
-
-

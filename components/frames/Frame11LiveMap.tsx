@@ -208,6 +208,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
         <div className="shrink-0 pt-1 flex items-center justify-between">
           {onBack ? (
             <button
+              id="btn-frame11-mobile-back"
               onClick={onBack}
               type="button"
               className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 text-white font-black text-xs shadow-md border border-slate-700 active:scale-95 transition-all cursor-pointer mb-1"
@@ -260,6 +261,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
         {/* Primary CTA: EK AUR FOOD STOP JODO */}
         <div className="w-full shrink-0">
           <button
+            id="btn-frame11-mobile-suggest-spot"
             onClick={onSuggestAnotherSpot}
             type="button"
             className="w-full py-2.5 sm:py-3 px-5 rounded-2xl bg-[#D4380D] hover:bg-[#ba300a] text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-md shadow-[#D4380D]/30 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer border-0"
@@ -271,6 +273,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
         {/* Register CTA: LIVE FOOD TOUR KE LIYE REGISTER KARO */}
         <div className="w-full shrink-0">
           <button
+            id="btn-frame11-mobile-register"
             onClick={handleOpenRegistration}
             type="button"
             className="w-full py-2.5 px-4 rounded-2xl bg-white hover:bg-slate-50 text-[#0B1B48] border-2 border-[#0B1B48] font-black text-xs sm:text-sm uppercase tracking-wide active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
@@ -285,6 +288,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
         {/* Sharing CTA (Positioned right after register): SHARE ON WHATSAPP / INSTA */}
         <div className="w-full pb-1 shrink-0">
           <button
+            id="btn-frame11-mobile-share"
             onClick={() => setIsShareModalOpen(true)}
             type="button"
             className="w-full py-2.5 sm:py-3 px-5 rounded-2xl bg-[#00A859] hover:bg-[#00914c] text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-md shadow-[#00A859]/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
@@ -345,6 +349,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
           {/* Primary CTA: EK AUR FOOD STOP JODO */}
           <div className="w-full pt-1">
             <button
+              id="btn-frame11-desktop-suggest-spot"
               onClick={onSuggestAnotherSpot}
               type="button"
               className="w-full py-3.5 px-6 rounded-2xl bg-[#D4380D] hover:bg-[#ba300a] text-white font-black text-sm lg:text-base uppercase tracking-wider shadow-lg shadow-[#D4380D]/30 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer border-0"
@@ -356,6 +361,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
           {/* Register CTA: REGISTER NOW AND GET CHANCE TO WIN ZOMATO VOUCHER */}
           <div className="w-full">
             <button
+              id="btn-frame11-desktop-register"
               onClick={handleOpenRegistration}
               type="button"
               className="w-full py-3 px-6 rounded-2xl bg-white hover:bg-slate-50 text-[#0B1B48] border-2 border-[#0B1B48] font-black text-xs lg:text-sm uppercase tracking-wide active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs text-center"
@@ -370,6 +376,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
           {/* Sharing CTA (Positioned right after register): SHARE ON WHATSAPP / INSTA */}
           <div className="w-full">
             <button
+              id="btn-frame11-desktop-share"
               onClick={() => setIsShareModalOpen(true)}
               type="button"
               className="w-full py-3.5 px-6 rounded-2xl bg-[#00A859] hover:bg-[#00914c] text-white font-black text-sm lg:text-base uppercase tracking-wider shadow-md shadow-[#00A859]/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
@@ -389,6 +396,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
           <div className="w-full max-w-sm bg-white rounded-3xl p-5 shadow-2xl border border-slate-200 relative flex flex-col gap-3 animate-in zoom-in-95 duration-200 max-h-[92%] overflow-y-auto">
             {/* Close Button */}
             <button
+              id="btn-frame11-modal-close"
               onClick={() => setIsModalOpen(false)}
               type="button"
               className="absolute top-3.5 right-3.5 p-1 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
@@ -500,6 +508,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
 
                     {onViewExistingPass && registeredInfo.participation_id && (
                       <button
+                        id="btn-frame11-view-existing-pass"
                         type="button"
                         onClick={() => {
                           setIsModalOpen(false);
@@ -546,6 +555,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
                 {/* Submit Button */}
                 <div className="pt-1">
                   <button
+                    id="btn-frame11-submit-registration"
                     type="submit"
                     disabled={isRegistering || isCheckingMobile || mobile.length !== 10 || name.trim().length < 2 || !consent || registeredInfo?.isRegistered}
                     className={`w-full py-3 px-4 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${

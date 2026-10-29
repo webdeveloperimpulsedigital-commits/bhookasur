@@ -102,6 +102,7 @@ export const Frame5EatingBegins: React.FC<Frame5EatingBeginsProps> = ({
       {/* Primary CTA: AUR KHILAO */}
       <div className="shrink-0 pt-1">
         <button
+          id="btn-frame5-aur-khilao"
           onClick={onFeedMore}
           type="button"
           className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-[#D4380D] hover:bg-[#ba300a] text-white font-black text-sm sm:text-base md:text-lg uppercase tracking-wider shadow-lg shadow-[#D4380D]/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"

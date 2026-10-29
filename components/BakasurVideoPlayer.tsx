@@ -586,6 +586,7 @@ export const BakasurVideoPlayer: React.FC<BakasurVideoPlayerProps> = ({
       <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between pointer-events-auto">
         {onBack ? (
           <button
+            id="btn-video-stage-back"
             onClick={(e) => {
               e.stopPropagation();
               onBack();

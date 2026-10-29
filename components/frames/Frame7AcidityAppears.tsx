@@ -84,6 +84,7 @@ export const Frame7AcidityAppears: React.FC<Frame7AcidityAppearsProps> = ({
       <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between pointer-events-auto">
         {onBack ? (
           <button
+            id="btn-frame7-back"
             onClick={handleBackClick}
             type="button"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/80 text-white font-black text-xs backdrop-blur-md border border-white/20 shadow-lg transition-all transform active:scale-95 cursor-pointer"
@@ -191,6 +192,7 @@ export const Frame7AcidityAppears: React.FC<Frame7AcidityAppearsProps> = ({
           {/* Primary CTA: HELP BHOOKASUR with glowing bounce & shine */}
           <div className="shrink-0 w-full max-w-sm sm:max-w-md mx-auto pt-2 pb-1">
             <button
+              id="btn-frame7-help-bhookasur"
               onClick={handleHelpClick}
               type="button"
               className="relative w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-[#D4380D] hover:bg-[#ba300a] active:bg-[#a12908] text-white font-black text-lg xs:text-xl sm:text-2xl uppercase tracking-wider shadow-xl shadow-[#D4380D]/40 hover:shadow-2xl hover:shadow-[#D4380D]/60 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer border-0 overflow-hidden group"

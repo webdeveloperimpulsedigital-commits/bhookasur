@@ -493,6 +493,7 @@ export const BakasurEatingStage: React.FC<BakasurEatingStageProps> = ({
       {/* 2. TOP LEFT BACK BUTTON (Identical to Frame 2, 7, 8) */}
       {onBack && (
         <button
+          id="btn-eating-stage-back"
           onClick={(e) => {
             e.stopPropagation();
             onBack();
