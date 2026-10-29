@@ -33,6 +33,7 @@ import {
   parseLocationFromQuery,
   resolveLocation,
   findNearestCityFromCoords,
+  resolveBestCoordsForRestaurant,
   type ResolvedLocation
 } from './locationResolver';
 import { db, type Restaurant } from './db';
@@ -715,8 +716,8 @@ async function searchLiveSwiggySuggestions(
           address: cleanAddress,
           area: finalArea,
           city: finalCity,
-          latitude: lat,
-          longitude: lng,
+          latitude: resolveBestCoordsForRestaurant(rawName, finalArea, finalCity, lat, lng).lat,
+          longitude: resolveBestCoordsForRestaurant(rawName, finalArea, finalCity, lat, lng).lng,
           rating: 4.5,
           image: iconicZomato?.image || swiggyImg,
           description: finalArea || finalCity ? `Popular food spot in ${[finalArea, finalCity].filter(Boolean).join(', ')}` : `Popular verified food spot`,

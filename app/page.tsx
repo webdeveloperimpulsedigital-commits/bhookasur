@@ -183,8 +183,16 @@ export default function CampaignPage() {
     playSound('click');
     triggerFrameTransition(2);
 
-    const activeSession = sessionId || getOrCreateSessionId();
-    if (!sessionId) setSessionId(activeSession);
+    const activeSession = resetSessionId();
+    setSessionId(activeSession);
+    setFirstRoundRestaurant(null);
+    setSelectedRestaurant(null);
+    setSelectedDish(null);
+    setFirstRoundDish(null);
+    setRegisteredMobile('');
+    setParticipationId('');
+    setRegError('');
+    setFeastingStage(1);
 
     // Save tour start session in DB immediately
     try {
@@ -243,6 +251,26 @@ export default function CampaignPage() {
           current_step: 'dish_selection'
         })
       });
+
+      if (false && effectiveSpot?.name) {
+        const activeUserId = getOrCreateUserId();
+        await fetch('/api/campaign/visit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: activeSession,
+            user_id: activeUserId,
+            restaurant_id: effectiveSpot?.id || 1,
+            restaurant_name: effectiveSpot.name,
+            dish_id: null,
+            dish_name: (effectiveSpot as { featured_dish?: string })?.featured_dish || 'Signature Dish',
+            city: effectiveSpot?.city || selectedCity || 'Pune',
+            latitude: effectiveSpot?.latitude ?? userCoords?.lat ?? null,
+            longitude: effectiveSpot?.longitude ?? userCoords?.lng ?? null,
+            round_number: (feastingStage === 2 || Boolean(firstRoundRestaurant)) ? 2 : 1
+          })
+        });
+      }
     } catch (err) {
       console.warn('Restaurant confirm save notice:', err);
     }
@@ -326,7 +354,7 @@ export default function CampaignPage() {
           city: selectedRestaurant?.city || selectedCity || 'Local',
           latitude: selectedRestaurant?.latitude ?? userCoords?.lat ?? null,
           longitude: selectedRestaurant?.longitude ?? userCoords?.lng ?? null,
-          round_number: feastingStage === 2 ? 2 : 1
+          round_number: (feastingStage === 2 || Boolean(firstRoundRestaurant)) ? 2 : 1
         })
       });
     } catch (err) {
@@ -624,7 +652,7 @@ export default function CampaignPage() {
           city: selectedRestaurant?.city || selectedCity || 'Local',
           latitude: selectedRestaurant?.latitude ?? userCoords?.lat ?? null,
           longitude: selectedRestaurant?.longitude ?? userCoords?.lng ?? null,
-          round_number: feastingStage === 2 ? 2 : 1
+          round_number: (feastingStage === 2 || Boolean(firstRoundRestaurant)) ? 2 : 1
         })
       });
 
@@ -653,24 +681,47 @@ export default function CampaignPage() {
     });
   };
 
-  // Frame 11 -> Frame 2 (Ek Aur Food Stop Jodo)
-  const handleAddAnotherSpot = () => {
+  // Frame 11 -> Frame 2 (Ek Aur Food Stop Jodo: Start a fresh, independent session)
+  const handleAddAnotherSpot = async () => {
     playSound('click');
-    if (selectedRestaurant && !firstRoundRestaurant) {
-      setFirstRoundRestaurant(selectedRestaurant);
-      setFirstRoundDish(selectedDish);
-    }
+    const newSession = resetSessionId();
+    setSessionId(newSession);
+    setFirstRoundRestaurant(null);
+    setFirstRoundDish(null);
     setSelectedRestaurant(null);
     setSelectedDish(null);
-    setFeastingStage(2);
+    setFeastingStage(1);
     setTourSpotRound(0);
     setCurrentTourSpot(null);
+    setVisitedSpotIds([]);
+    setRegisteredMobile('');
+    setParticipationId('');
+    setRegError('');
     triggerFrameTransition(2);
+
+    try {
+      await fetch('/api/campaign/session/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: newSession,
+          user_location: selectedCity,
+          latitude: userCoords?.lat || null,
+          longitude: userCoords?.lng || null,
+          current_stage: 'frame_2_restaurant_search',
+          current_step: 'restaurant_search',
+          food_meter_percentage: 20
+        })
+      });
+    } catch (err) {
+      console.warn('New session start save notice:', err);
+    }
+
     trackUserStep({
-      sessionId,
+      sessionId: newSession,
       stepName: 'frame_11_add_another_spot',
-      stepTitle: 'Frame 11: Ek Aur Food Stop Jodo Clicked',
-      stepNumber: 11
+      stepTitle: 'Frame 11: Ek Aur Food Stop Jodo Clicked (New Session Started)',
+      stepNumber: 2
     });
   };
 
@@ -1076,6 +1127,26 @@ export default function CampaignPage() {
                   isSecondRound={feastingStage === 2}
                   onSelectDish={(d) => setSelectedDish(d)}
                   onConfirmDish={(name, img) => handleDishConfirmed(name, img)}
+                  onSearchSelectDish={(dishName, dishId) => {
+                    const activeSession = sessionId || getOrCreateSessionId();
+                    const activeUserId = getOrCreateUserId();
+                    fetch('/api/campaign/visit', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        session_id: activeSession,
+                        user_id: activeUserId,
+                        restaurant_id: selectedRestaurant.id || 1,
+                        restaurant_name: selectedRestaurant.name,
+                        dish_id: dishId || 1,
+                        dish_name: dishName,
+                        city: selectedRestaurant.city || selectedCity || 'Pune',
+                        latitude: selectedRestaurant.latitude ?? userCoords?.lat ?? null,
+                        longitude: selectedRestaurant.longitude ?? userCoords?.lng ?? null,
+                        round_number: (feastingStage === 2 || Boolean(firstRoundRestaurant)) ? 2 : 1
+                      })
+                    }).catch(() => {});
+                  }}
                   onBack={() => setCurrentFrame(2)}
                 />
               )}

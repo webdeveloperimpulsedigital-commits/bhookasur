@@ -157,6 +157,25 @@ export const CITY_GAZETTEER: Record<string, { lat: number; lng: number; label: s
   bhosari: { lat: 18.6250, lng: 73.8450, label: 'Bhosari, Pune' },
   nigdi: { lat: 18.6550, lng: 73.7750, label: 'Nigdi, Pune' },
   akurdi: { lat: 18.6480, lng: 73.7680, label: 'Akurdi, Pune' },
+  'mhatre bridge': { lat: 18.5025, lng: 73.8358, label: 'Mhatre Bridge, Pune' },
+  erandwane: { lat: 18.5072, lng: 73.8315, label: 'Erandwane, Pune' },
+  'karve nagar': { lat: 18.4895, lng: 73.8195, label: 'Karve Nagar, Pune' },
+  karvenagar: { lat: 18.4895, lng: 73.8195, label: 'Karve Nagar, Pune' },
+  'nal stop': { lat: 18.5082, lng: 73.8275, label: 'Nal Stop, Pune' },
+  anandnagar: { lat: 18.4771, lng: 73.8213, label: 'Anandnagar, Pune' },
+  'anand nagar': { lat: 18.4771, lng: 73.8213, label: 'Anandnagar, Pune' },
+  'bajirao road': { lat: 18.5142, lng: 73.8535, label: 'Bajirao Road, Pune' },
+  'tilak road': { lat: 18.5085, lng: 73.8510, label: 'Tilak Road, Pune' },
+  'jm road': { lat: 18.5236, lng: 73.8478, label: 'JM Road, Pune' },
+  'shaniwar peth': { lat: 18.5186, lng: 73.8548, label: 'Shaniwar Peth, Pune' },
+  'narayan peth': { lat: 18.5155, lng: 73.8505, label: 'Narayan Peth, Pune' },
+  dhayari: { lat: 18.4475, lng: 73.8095, label: 'Dhayari, Pune' },
+  rajajinagar: { lat: 12.9982, lng: 77.5530, label: 'Rajajinagar, Bengaluru' },
+  indiranagar: { lat: 12.9784, lng: 77.6408, label: 'Indiranagar, Bengaluru' },
+  koramangala: { lat: 12.9352, lng: 77.6245, label: 'Koramangala, Bengaluru' },
+  jayanagar: { lat: 12.9308, lng: 77.5838, label: 'Jayanagar, Bengaluru' },
+  'church street': { lat: 12.9750, lng: 77.6050, label: 'Church Street, Bengaluru' },
+  'brigade road': { lat: 12.9719, lng: 77.6070, label: 'Brigade Road, Bengaluru' },
   nashik: { lat: 19.9975, lng: 73.7898, label: 'Nashik' },
   nasik: { lat: 19.9975, lng: 73.7898, label: 'Nashik' },
   nagpur: { lat: 21.1458, lng: 79.0882, label: 'Nagpur' },
@@ -534,5 +553,123 @@ export function findNearestCityFromCoords(lat: number, lng: number, maxRadiusKm 
     }
   }
   return bestLabel;
+}
+
+/**
+ * Resolves the most accurate coordinates for a restaurant using its name, area, and city,
+ * avoiding generic ISP/localhost fallback coordinates (like 18.5211, 73.8502) and adding
+ * a small deterministic micro-offset when falling back to a city/area center so different
+ * restaurants never stack on the exact same pin coordinate.
+ */
+export function resolveBestCoordsForRestaurant(
+  restaurantName: string,
+  area?: string | null,
+  city?: string | null,
+  fallbackLat?: number | null,
+  fallbackLng?: number | null
+): { lat: number; lng: number; city?: string; area?: string } {
+  const cleanName = (restaurantName || '').trim();
+  const cleanArea = (area || '').trim();
+  const cleanCity = (city || '').trim();
+
+  // Deterministic micro-offset (-0.0065 to +0.0065 deg, ~300-700m) based on restaurant name
+  let hash = 2166136261;
+  const seedStr = `${cleanName.toLowerCase()}|${cleanArea.toLowerCase()}|${cleanCity.toLowerCase()}`;
+  for (let i = 0; i < seedStr.length; i++) {
+    hash ^= seedStr.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  const u1 = ((hash >>> 0) % 1000) / 1000;
+  const u2 = (((hash >>> 10) ^ (hash >>> 20)) >>> 0) % 1000 / 1000;
+  const dLat = (u1 - 0.5) * 0.011;
+  const dLng = (u2 - 0.5) * 0.011;
+
+  if (cleanArea) {
+    const areaGaz = lookupGazetteer(cleanArea);
+    if (areaGaz) {
+      return {
+        lat: Number((areaGaz.lat + dLat * 0.4).toFixed(6)),
+        lng: Number((areaGaz.lng + dLng * 0.4).toFixed(6)),
+        city: cleanCity || areaGaz.label.split(',').pop()?.trim(),
+        area: cleanArea
+      };
+    }
+  }
+
+  const parenMatch = cleanName.match(/\(([^)]+)\)/);
+  if (parenMatch && parenMatch[1]) {
+    const parenGaz = lookupGazetteer(parenMatch[1]);
+    if (parenGaz) {
+      return {
+        lat: Number((parenGaz.lat + dLat * 0.4).toFixed(6)),
+        lng: Number((parenGaz.lng + dLng * 0.4).toFixed(6)),
+        city: cleanCity || parenGaz.label.split(',').pop()?.trim(),
+        area: parenMatch[1].trim()
+      };
+    }
+  }
+
+  const normName = normalize(cleanName);
+  const nameTokens = normName.split(' ').filter(Boolean);
+  for (let take = Math.min(3, nameTokens.length); take >= 1; take--) {
+    const tail = nameTokens.slice(nameTokens.length - take).join(' ');
+    const tailGaz = lookupGazetteer(tail);
+    if (tailGaz) {
+      return {
+        lat: Number((tailGaz.lat + dLat * 0.4).toFixed(6)),
+        lng: Number((tailGaz.lng + dLng * 0.4).toFixed(6)),
+        city: cleanCity || tailGaz.label.split(',').pop()?.trim(),
+        area: cleanArea || tail
+      };
+    }
+  }
+
+  const fLat = Number(fallbackLat);
+  const fLng = Number(fallbackLng);
+  const hasValidFallback = Number.isFinite(fLat) && Number.isFinite(fLng) && fLat >= 6 && fLat <= 37.5 && fLng >= 68 && fLng <= 97.5;
+  const isGenericFallback =
+    !hasValidFallback ||
+    (Math.abs(fLat - 18.5211) < 0.001 && Math.abs(fLng - 73.8502) < 0.001) ||
+    (Math.abs(fLat - 18.5204) < 0.001 && Math.abs(fLng - 73.8407) < 0.001) ||
+    (Math.abs(fLat - 18.5204) < 0.001 && Math.abs(fLng - 73.8567) < 0.001) ||
+    (Math.abs(fLat - 19.076) < 0.001 && Math.abs(fLng - 72.8777) < 0.001);
+
+  const cityGaz = cleanCity ? lookupGazetteer(cleanCity) : null;
+  if (cityGaz) {
+    const farFromCity = !hasValidFallback || distanceKm(fLat, fLng, cityGaz.lat, cityGaz.lng) > 30;
+    if (isGenericFallback || farFromCity) {
+      return {
+        lat: Number((cityGaz.lat + dLat).toFixed(6)),
+        lng: Number((cityGaz.lng + dLng).toFixed(6)),
+        city: cleanCity,
+        area: cleanArea
+      };
+    }
+  }
+
+  if (hasValidFallback) {
+    if (isGenericFallback) {
+      return {
+        lat: Number((fLat + dLat).toFixed(6)),
+        lng: Number((fLng + dLng).toFixed(6)),
+        city: cleanCity || 'Pune',
+        area: cleanArea
+      };
+    }
+    return {
+      lat: fLat,
+      lng: fLng,
+      city: cleanCity || findNearestCityFromCoords(fLat, fLng) || 'Pune',
+      area: cleanArea
+    };
+  }
+
+  return {
+    lat: Number((18.5204 + dLat).toFixed(6)),
+    lng: Number((73.8567 + dLng).toFixed(6)),
+    city: cleanCity || 'Pune',
+    area: cleanArea
+  };
+
 }
 

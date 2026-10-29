@@ -62,12 +62,6 @@ export const InteractiveTourMap: React.FC<InteractiveTourMapProps> = ({
         setIsLoading(true);
         const params = new URLSearchParams();
         if (sessionId) params.set('session_id', sessionId);
-        const uid = getOrCreateUserId();
-        if (uid) params.set('user_id', uid);
-        const history = getUserSessionsHistory();
-        if (history.length > 0) params.set('session_ids', history.join(','));
-        const mob = getStoredUserMobile();
-        if (mob) params.set('mobile', mob);
 
         const url = withBasePath(`/api/campaign/map?${params.toString()}`);
         const res = await fetch(url);
@@ -155,13 +149,13 @@ export const InteractiveTourMap: React.FC<InteractiveTourMapProps> = ({
 
           const dbSpots: CurrentUserSpotInfo[] = (json.data.currentUserSpots && Array.isArray(json.data.currentUserSpots))
             ? json.data.currentUserSpots.map((s: any, idx: number) => ({
-                name: s.name,
-                city: s.city,
-                dishName: s.featured_dish || 'Specialty Dish',
-                latitude: s.latitude,
-                longitude: s.longitude,
-                stopNumber: s.stopNumber || idx + 1
-              }))
+              name: s.name,
+              city: s.city,
+              dishName: s.featured_dish || 'Specialty Dish',
+              latitude: s.latitude,
+              longitude: s.longitude,
+              stopNumber: s.stopNumber || idx + 1
+            }))
             : [];
 
           // Prefer propSpots if provided by active interactive flow, otherwise dbSpots from database
@@ -195,6 +189,18 @@ export const InteractiveTourMap: React.FC<InteractiveTourMapProps> = ({
             }
           });
           cleanUserSpots.sort((a, b) => (a.stopNumber || 1) - (b.stopNumber || 1));
+          // Ensure Stop 1 and Stop 2 Blue pins never overlap on the exact same coordinate
+          for (let i = 1; i < cleanUserSpots.length; i++) {
+            const prev = cleanUserSpots[i - 1];
+            const curr = cleanUserSpots[i];
+            if (prev.latitude && prev.longitude && curr.latitude && curr.longitude) {
+              const dist = Math.hypot(curr.latitude - prev.latitude, curr.longitude - prev.longitude);
+              if (dist < 0.0035) {
+                curr.latitude = Number((curr.latitude + 0.0045 * i).toFixed(6));
+                curr.longitude = Number((curr.longitude + 0.0045 * i).toFixed(6));
+              }
+            }
+          }
 
           // STRICT 1-TO-1 PIN MAPPING:
           // Reset all points first to regular historical spots
@@ -587,6 +593,14 @@ export const InteractiveTourMap: React.FC<InteractiveTourMapProps> = ({
       setTimeout(() => {
         if (!isCancelled && map) {
           map.invalidateSize();
+          if (userSpots.length > 1) {
+            const userBounds = L.latLngBounds(userSpots.map(p => [p.latitude, p.longitude]));
+            if (userBounds.isValid()) {
+              map.fitBounds(userBounds, { padding: [60, 60], maxZoom: 12 });
+            }
+          } else if (userSpots.length === 1) {
+            map.setView([userSpots[0].latitude, userSpots[0].longitude], 12);
+          }
         }
       }, 250);
     }

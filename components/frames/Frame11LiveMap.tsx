@@ -128,12 +128,6 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
       try {
         const params = new URLSearchParams();
         if (sessionId) params.set('session_id', sessionId);
-        const uid = getOrCreateUserId();
-        if (uid) params.set('user_id', uid);
-        const history = getUserSessionsHistory();
-        if (history.length > 0) params.set('session_ids', history.join(','));
-        const mob = registeredMobile || getStoredUserMobile();
-        if (mob) params.set('mobile', mob);
 
         const url = `/api/campaign/map?${params.toString()}`;
         const res = await fetch(url);
@@ -230,7 +224,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
         <div className="w-full bg-[#F3F5FA] rounded-2xl border border-slate-200/90 shadow-xs flex items-center py-1.5 px-1 shrink-0">
           <div className="flex-1 text-center border-r border-slate-200/90 px-1">
             <div className="text-lg sm:text-2xl font-black text-[#D4380D] leading-none">
-              {stats.foodSpots !== null && stats.foodSpots > 0 ? stats.foodSpots : (stats.foodSpots === 0 ? '66+' : '...')}
+              {stats.foodSpots !== null ? stats.foodSpots : '...'}
             </div>
             <div className="text-[10px] sm:text-[11px] font-black text-[#0B1B48] mt-0.5 tracking-tight">
               Food spots
@@ -239,7 +233,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
 
           <div className="flex-1 text-center px-1">
             <div className="text-lg sm:text-2xl font-black text-[#D4380D] leading-none">
-              {stats.mustTryDishes !== null && stats.mustTryDishes > 0 ? stats.mustTryDishes : (stats.mustTryDishes === 0 ? '100+' : '...')}
+              {stats.mustTryDishes !== null ? stats.mustTryDishes : '...'}
             </div>
             <div className="text-[10px] sm:text-[11px] font-black text-[#0B1B48] mt-0.5 tracking-tight">
               No of dishes
@@ -329,7 +323,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
           <div className="w-full bg-[#F3F5FA] rounded-2xl border border-slate-200/90 shadow-xs flex items-center py-3 px-2">
             <div className="flex-1 text-center border-r border-slate-200/90 px-2">
               <div className="text-2xl lg:text-3xl font-black text-[#D4380D] leading-none">
-                {stats.foodSpots !== null && stats.foodSpots > 0 ? stats.foodSpots : (stats.foodSpots === 0 ? '66+' : '...')}
+                {stats.foodSpots !== null ? stats.foodSpots : '...'}
               </div>
               <div className="text-xs lg:text-sm font-black text-[#0B1B48] mt-1 tracking-tight">
                 Food spots
@@ -338,7 +332,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
 
             <div className="flex-1 text-center px-2">
               <div className="text-2xl lg:text-3xl font-black text-[#D4380D] leading-none">
-                {stats.mustTryDishes !== null && stats.mustTryDishes > 0 ? stats.mustTryDishes : (stats.mustTryDishes === 0 ? '100+' : '...')}
+                {stats.mustTryDishes !== null ? stats.mustTryDishes : '...'}
               </div>
               <div className="text-xs lg:text-sm font-black text-[#0B1B48] mt-1 tracking-tight">
                 No of dishes

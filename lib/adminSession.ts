@@ -1,30 +1,43 @@
 /**
  * Signed admin session tokens (HMAC-SHA256 via Web Crypto).
- * Works in both the Edge runtime (middleware) and the Node runtime (route handlers).
+ * Supports two distinct roles:
+ *  - 'super_admin': Full access (View, Edit, Delete, Export to Excel)
+ *  - 'admin': View-only access (Can view dashboard, searches & participants; cannot edit, delete, or export)
  *
- * Token format: `<expiryEpochMs>.<hexSignature>`. The signing secret is never sent to the browser.
+ * Works in both the Edge runtime (middleware) and the Node runtime (route handlers).
  */
 
 export const ADMIN_COOKIE_NAME = 'bakasur_admin_session';
 export const ADMIN_SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
-const isProduction = () => process.env.NODE_ENV === 'production';
+export type AdminRole = 'super_admin' | 'admin';
 
-/** Admin credentials from env. In production there is NO default password: admin login stays disabled until set. */
-export function getAdminCredentials(): { username: string; password: string | null } {
-  const username = (process.env.ADMIN_USERNAME || process.env.ADMIN_USER || 'admin').trim();
-  const envPassword = process.env.ADMIN_PASSWORD || process.env.ADMIN_PASS || '';
-  if (envPassword) return { username, password: envPassword };
-  return { username, password: isProduction() ? null : 'admin123' };
+export interface AdminSessionInfo {
+  valid: boolean;
+  role: AdminRole;
+  username: string;
 }
 
-function getSigningSecret(): string | null {
+/** Super Admin credentials (Full access: View, Edit, Delete, Export Excel) */
+export function getSuperAdminCredentials(): { username: string; password: string } {
+  const username = (process.env.SUPER_ADMIN_USERNAME || 'superadmin').trim();
+  const password = (process.env.SUPER_ADMIN_PASSWORD || 'superadmin123').trim();
+  return { username, password };
+}
+
+/** Regular Admin credentials (View-only access) */
+export function getAdminCredentials(): { username: string; password: string } {
+  const username = (process.env.ADMIN_USERNAME || process.env.ADMIN_USER || 'admin').trim();
+  const password = (process.env.ADMIN_PASSWORD || process.env.ADMIN_PASS || 'admin123').trim();
+  return { username, password };
+}
+
+function getSigningSecret(): string {
   const explicit = process.env.ADMIN_SESSION_SECRET || '';
   if (explicit) return explicit;
-  const { password } = getAdminCredentials();
-  if (!password) return null;
-  // Derive from the admin password so changing the password invalidates every existing session
-  return `bakasur-admin::${password}`;
+  const superCreds = getSuperAdminCredentials();
+  const adminCreds = getAdminCredentials();
+  return `bakasur-admin-v2::${superCreds.password}::${adminCreds.password}`;
 }
 
 async function hmacHex(secret: string, message: string): Promise<string> {
@@ -41,21 +54,44 @@ function timingSafeEqualHex(a: string, b: string): boolean {
   return diff === 0;
 }
 
-export async function createAdminSessionToken(): Promise<string | null> {
+export async function createAdminSessionToken(
+  role: AdminRole = 'admin',
+  username: string = 'admin'
+): Promise<string | null> {
   const secret = getSigningSecret();
   if (!secret) return null;
   const expiry = Date.now() + ADMIN_SESSION_MAX_AGE_SECONDS * 1000;
-  const sig = await hmacHex(secret, `admin:${expiry}`);
-  return `${expiry}.${sig}`;
+  const cleanUser = encodeURIComponent(username);
+  const payload = `${role}.${cleanUser}.${expiry}`;
+  const sig = await hmacHex(secret, `admin:${payload}`);
+  return `${payload}.${sig}`;
+}
+
+export async function verifyAdminSession(token: string | undefined | null): Promise<AdminSessionInfo | null> {
+  if (!token) return null;
+  const secret = getSigningSecret();
+  if (!secret) return null;
+
+  const parts = token.split('.');
+  if (parts.length === 4) {
+    const [roleStr, encodedUser, expiryStr, sig] = parts;
+    const role: AdminRole = roleStr === 'super_admin' ? 'super_admin' : 'admin';
+    const expiry = Number(expiryStr);
+    if (!expiryStr || !sig || !Number.isFinite(expiry) || expiry < Date.now()) return null;
+    const payload = `${roleStr}.${encodedUser}.${expiryStr}`;
+    const expected = await hmacHex(secret, `admin:${payload}`);
+    if (!timingSafeEqualHex(sig, expected)) return null;
+    return {
+      valid: true,
+      role,
+      username: decodeURIComponent(encodedUser)
+    };
+  }
+
+  return null;
 }
 
 export async function verifyAdminSessionToken(token: string | undefined | null): Promise<boolean> {
-  if (!token) return false;
-  const secret = getSigningSecret();
-  if (!secret) return false;
-  const [expiryStr, sig] = token.split('.');
-  const expiry = Number(expiryStr);
-  if (!expiryStr || !sig || !Number.isFinite(expiry) || expiry < Date.now()) return false;
-  const expected = await hmacHex(secret, `admin:${expiry}`);
-  return timingSafeEqualHex(sig, expected);
+  const session = await verifyAdminSession(token);
+  return Boolean(session?.valid);
 }

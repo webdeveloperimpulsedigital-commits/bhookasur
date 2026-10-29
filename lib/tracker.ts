@@ -136,10 +136,11 @@ export function getOrCreateSessionId(): string {
 export function resetSessionId(): string {
   const newSessionId = generateSessionId();
   if (typeof window !== 'undefined') {
+    const newUserId = `bkt_usr_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     localStorage.setItem(SESSION_KEY, newSessionId);
-    if (hasConsentFor('interaction') || hasConsentFor('campaign')) {
-      recordUserSession(newSessionId);
-    }
+    localStorage.setItem(USER_KEY, newUserId);
+    localStorage.removeItem(USER_MOBILE_KEY);
+    localStorage.setItem(SESSIONS_HISTORY_KEY, JSON.stringify([newSessionId]));
   }
   return newSessionId;
 }

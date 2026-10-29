@@ -4,7 +4,9 @@ import {
   ADMIN_COOKIE_NAME,
   ADMIN_SESSION_MAX_AGE_SECONDS,
   createAdminSessionToken,
-  getAdminCredentials
+  getAdminCredentials,
+  getSuperAdminCredentials,
+  type AdminRole
 } from '@/lib/adminSession';
 
 export const dynamic = 'force-dynamic';
@@ -12,7 +14,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { username, password } = body;
+    const { username, password, role: requestedRole } = body;
 
     if (!username || !password) {
       return NextResponse.json(
@@ -21,23 +23,52 @@ export async function POST(request: Request) {
       );
     }
 
-    const { username: ADMIN_USERNAME, password: ADMIN_PASSWORD } = getAdminCredentials();
-    if (!ADMIN_PASSWORD) {
-      // Production without ADMIN_PASSWORD configured: admin login is disabled (no default password)
-      return NextResponse.json(
-        { success: false, error: 'Admin login is not configured on this server' },
-        { status: 503 }
-      );
+    const cleanUser = String(username).trim();
+    const cleanPass = String(password);
+
+    const superCreds = getSuperAdminCredentials();
+    const adminCreds = getAdminCredentials();
+
+    let authenticatedRole: AdminRole | null = null;
+    let authenticatedUsername = '';
+
+    if (requestedRole === 'super_admin') {
+      if (cleanUser === superCreds.username && cleanPass === superCreds.password) {
+        authenticatedRole = 'super_admin';
+        authenticatedUsername = superCreds.username;
+      } else {
+        return NextResponse.json(
+          { success: false, error: 'Invalid Super Admin credentials' },
+          { status: 401 }
+        );
+      }
+    } else if (requestedRole === 'admin') {
+      if (cleanUser === adminCreds.username && cleanPass === adminCreds.password) {
+        authenticatedRole = 'admin';
+        authenticatedUsername = adminCreds.username;
+      } else {
+        return NextResponse.json(
+          { success: false, error: 'Invalid Admin (View-Only) credentials' },
+          { status: 401 }
+        );
+      }
+    } else {
+      // Auto-detect if role was not explicitly passed
+      if (cleanUser === superCreds.username && cleanPass === superCreds.password) {
+        authenticatedRole = 'super_admin';
+        authenticatedUsername = superCreds.username;
+      } else if (cleanUser === adminCreds.username && cleanPass === adminCreds.password) {
+        authenticatedRole = 'admin';
+        authenticatedUsername = adminCreds.username;
+      } else {
+        return NextResponse.json(
+          { success: false, error: 'Invalid credentials' },
+          { status: 401 }
+        );
+      }
     }
 
-    if (String(username).trim() !== ADMIN_USERNAME || String(password) !== ADMIN_PASSWORD) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid admin credentials' },
-        { status: 401 }
-      );
-    }
-
-    const token = await createAdminSessionToken();
+    const token = await createAdminSessionToken(authenticatedRole, authenticatedUsername);
     if (!token) {
       return NextResponse.json(
         { success: false, error: 'Admin login is not configured on this server' },
@@ -45,7 +76,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Set signed authentication cookie valid for 7 days
     const cookieStore = await cookies();
     cookieStore.set(ADMIN_COOKIE_NAME, token, {
       httpOnly: true,
@@ -57,8 +87,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Admin logged in successfully',
-      user: { username: ADMIN_USERNAME }
+      message: `${authenticatedRole === 'super_admin' ? 'Super Admin' : 'Admin'} logged in successfully`,
+      user: {
+        username: authenticatedUsername,
+        role: authenticatedRole
+      }
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Login failed';

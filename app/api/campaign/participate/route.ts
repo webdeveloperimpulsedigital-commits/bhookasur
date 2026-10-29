@@ -90,6 +90,7 @@ export async function POST(request: Request) {
     let restLng = body.longitude ? parseFloat(body.longitude) : 73.8407;
     let finalRestId = restaurant_id ? parseInt(restaurant_id, 10) : null;
     let finalDishId = dish_id ? parseInt(dish_id, 10) : null;
+    let hasExistingSessionVisits = false;
 
     // 2. Query all visits for session to capture both restaurants if multi-stop tour
     if (session_id) {
@@ -101,6 +102,7 @@ export async function POST(request: Request) {
             [session_id]
           );
           if (visits && visits.length > 0) {
+            hasExistingSessionVisits = true;
             const visitedRestNames = Array.from(new Set(visits.map(v => String(v.restaurant_name || '').trim()).filter(Boolean)));
             if (visitedRestNames.length > 1 && (!restaurantName || !restaurantName.includes('&'))) {
               restaurantName = visitedRestNames.join(' & ');
@@ -213,20 +215,24 @@ export async function POST(request: Request) {
       }, { status: 409 });
     }
 
-    // Record visit on user map (using resolved restaurant ID, preventing duplicates)
-    const restIdToRecord = finalRestId || (restaurant_id ? parseInt(restaurant_id, 10) : null);
-    if (restIdToRecord) {
-      await db.recordVisit({
-        session_id: participant.session_id,
-        user_id: user_id ? String(user_id) : undefined,
-        restaurant_id: restIdToRecord,
-        restaurant_name: restaurantName,
-        dish_id: finalDishId,
-        dish_name: dishName,
-        city: finalCity,
-        latitude: restLat,
-        longitude: restLng
-      });
+    // Only record fallback visits if this session doesn't already have visits in campaign_visits
+    if (!hasExistingSessionVisits) {
+      const restParts = restaurantName.split(/\s*&\s*/).map((s: string) => s.trim()).filter(Boolean);
+      const dishParts = dishName.split(/\s*&\s*/).map((s: string) => s.trim()).filter(Boolean);
+      const count = Math.max(restParts.length, 1);
+      for (let i = 0; i < Math.min(count, 2); i++) {
+        await db.recordVisit({
+          session_id: participant.session_id,
+          user_id: user_id ? String(user_id) : undefined,
+          restaurant_id: i === 0 ? finalRestId : null,
+          restaurant_name: restParts[i] || restParts[0] || 'Local Food Spot',
+          dish_id: i === 0 ? finalDishId : null,
+          dish_name: dishParts[i] || dishParts[0] || 'Signature Specialty',
+          city: finalCity,
+          latitude: restLat,
+          longitude: restLng
+        });
+      }
     }
 
     return NextResponse.json({

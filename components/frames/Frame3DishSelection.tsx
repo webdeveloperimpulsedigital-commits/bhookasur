@@ -14,6 +14,7 @@ interface Frame3DishSelectionProps {
   isSecondRound?: boolean;
   onSelectDish: (dish: Dish | { name: string; id?: number; price?: number; image?: string }) => void;
   onConfirmDish: (dishName?: string, dishImage?: string) => void;
+  onSearchSelectDish?: (dishName: string, dishId?: number) => void;
   onBack?: () => void;
 }
 
@@ -70,6 +71,7 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
   selectedDish,
   onSelectDish,
   onConfirmDish,
+  onSearchSelectDish,
   onBack
 }) => {
   const currentKey = `v52_${restaurant.id}_${(restaurant.name || '').trim().toLowerCase()}`;
@@ -623,7 +625,10 @@ export const Frame3DishSelection: React.FC<Frame3DishSelectionProps> = ({
                     return (
                       <div
                         key={`suggest-${dish.id}-${dish.name}`}
-                        onClick={() => handleSelectDishItem(dish)}
+                        onClick={() => {
+                          handleSelectDishItem(dish);
+                          if (onSearchSelectDish) onSearchSelectDish(cleanName, dish.id);
+                        }}
                         className={`w-full p-2 rounded-xl transition-all flex items-center justify-between gap-2.5 cursor-pointer text-left ${isSelected
                             ? 'bg-orange-50/90 border border-orange-200'
                             : 'hover:bg-slate-50 border border-transparent'
