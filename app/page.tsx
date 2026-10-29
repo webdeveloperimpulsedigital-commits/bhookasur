@@ -24,6 +24,7 @@ import { getDishVisualAssets, formatCleanDishName } from '@/lib/dishAssets';
 import { getOrCreateSessionId, resetSessionId, trackUserStep, getOrCreateUserId, setStoredUserMobile } from '@/lib/tracker';
 import { preloadUpcomingFrameMedia } from '@/lib/mediaPreloader';
 import { withBasePath } from '@/lib/basePath';
+import { getConsentedLocation, saveConsentedLocation, hasConsentFor } from '@/lib/cookieConsent';
 
 export type FrameNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
 
@@ -79,6 +80,9 @@ export default function CampaignPage() {
   // Initialize Session on Mount
   useEffect(() => {
     const sess = getOrCreateSessionId();
+    const savedLoc = getConsentedLocation();
+    if (savedLoc?.city && !selectedCity) setSelectedCity(savedLoc.city);
+    if (savedLoc?.coords && !userCoords) setUserCoords(savedLoc.coords);
     setSessionId(sess);
 
     if (typeof window !== 'undefined') {
@@ -107,6 +111,9 @@ export default function CampaignPage() {
   // Preload upcoming animation frames and media into memory and cache
   useEffect(() => {
     preloadUpcomingFrameMedia(currentFrame);
+    if (selectedCity && hasConsentFor('location')) {
+      saveConsentedLocation(selectedCity, userCoords);
+    }
   }, [currentFrame]);
 
   // Location Detection: ONLY if user explicitly allows location access

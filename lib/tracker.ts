@@ -1,5 +1,7 @@
 'use client';
 
+import { getCookieConsent, hasConsentFor } from './cookieConsent';
+
 export interface TrackStepOptions {
   sessionId?: string;
   stepName: string;
@@ -32,11 +34,18 @@ export function generateSessionId(): string {
 
 /**
  * Generate or retrieve a persistent user ID for this browser/device
- * Example format: bkt_usr_1726048123456_k8m29fa
+ * Only persists in localStorage if interaction or campaign consent is granted.
  */
 export function getOrCreateUserId(): string {
   if (typeof window === 'undefined') {
     return 'bkt_usr_server';
+  }
+
+  const canPersistUser = hasConsentFor('interaction') || hasConsentFor('campaign');
+  if (!canPersistUser) {
+    const timestamp = Date.now();
+    const randomPart = Math.random().toString(36).substring(2, 9);
+    return `bkt_usr_anon_${timestamp}_${randomPart}`;
   }
 
   let userId = localStorage.getItem(USER_KEY);
@@ -54,6 +63,7 @@ export function getOrCreateUserId(): string {
  */
 export function getUserSessionsHistory(): string[] {
   if (typeof window === 'undefined') return [];
+  if (!hasConsentFor('interaction') && !hasConsentFor('campaign')) return [];
   try {
     const raw = localStorage.getItem(SESSIONS_HISTORY_KEY);
     if (!raw) return [];
@@ -69,6 +79,7 @@ export function getUserSessionsHistory(): string[] {
  */
 export function recordUserSession(sessionId: string): void {
   if (typeof window === 'undefined' || !sessionId) return;
+  if (!hasConsentFor('interaction') && !hasConsentFor('campaign')) return;
   try {
     const history = getUserSessionsHistory();
     if (!history.includes(sessionId)) {
@@ -100,6 +111,7 @@ export function setStoredUserMobile(mobile: string): void {
 
 /**
  * Retrieve current session ID from localStorage or generate a fresh one
+ * (Session ID is strictly necessary for active multi-frame tour continuity)
  */
 export function getOrCreateSessionId(): string {
   if (typeof window === 'undefined') {
@@ -111,9 +123,10 @@ export function getOrCreateSessionId(): string {
     sessionId = generateSessionId();
     localStorage.setItem(SESSION_KEY, sessionId);
   }
-  // Record session in user's history and ensure persistent user_id exists
-  recordUserSession(sessionId);
-  getOrCreateUserId();
+  if (hasConsentFor('interaction') || hasConsentFor('campaign')) {
+    recordUserSession(sessionId);
+    getOrCreateUserId();
+  }
   return sessionId;
 }
 
@@ -124,47 +137,69 @@ export function resetSessionId(): string {
   const newSessionId = generateSessionId();
   if (typeof window !== 'undefined') {
     localStorage.setItem(SESSION_KEY, newSessionId);
-    recordUserSession(newSessionId);
+    if (hasConsentFor('interaction') || hasConsentFor('campaign')) {
+      recordUserSession(newSessionId);
+    }
   }
   return newSessionId;
 }
 
 /**
- * Track an individual step of the user journey in the database
+ * Track an individual step of the user journey in the database,
+ * respecting the user's Cookie & Privacy Consent preferences.
  */
 export async function trackUserStep(options: TrackStepOptions): Promise<void> {
   if (typeof window === 'undefined') return;
 
+  const consent = getCookieConsent();
+  const allowLocation = hasConsentFor('location');
+  const allowInteraction = hasConsentFor('interaction');
+  const allowCampaign = hasConsentFor('campaign');
+
+  // If user has not consented to interaction or campaign tracking, do not send analytics telemetry
+  if (!allowInteraction && !allowCampaign) {
+    return;
+  }
+
   const sessionId = options.sessionId || getOrCreateSessionId();
+
+  const sanitizedMetadata: Record<string, unknown> = {
+    ...(allowInteraction ? options.metadata : {}),
+    consent_method: consent.consentMethod || 'custom',
+    timestamp: new Date().toISOString(),
+    url: window.location.href,
+    screen: `${window.innerWidth}x${window.innerHeight}`,
+  };
+
+  if (!allowLocation) {
+    delete sanitizedMetadata.city;
+    delete sanitizedMetadata.latitude;
+    delete sanitizedMetadata.longitude;
+  }
 
   const payload = {
     session_id: sessionId,
     step_name: options.stepName,
     step_title: options.stepTitle || formatStepTitle(options.stepName),
     step_number: options.stepNumber,
-    user_location: options.userLocation,
-    latitude: options.latitude,
-    longitude: options.longitude,
-    restaurant_id: options.restaurantId,
-    dish_id: options.dishId,
+    user_location: allowLocation ? options.userLocation : undefined,
+    latitude: allowLocation ? options.latitude : undefined,
+    longitude: allowLocation ? options.longitude : undefined,
+    restaurant_id: allowInteraction ? options.restaurantId : undefined,
+    dish_id: allowInteraction ? options.dishId : undefined,
     food_meter_percentage: options.foodMeterPercentage,
-    metadata: {
-      ...options.metadata,
-      timestamp: new Date().toISOString(),
-      url: window.location.href,
-      screen: `${window.innerWidth}x${window.innerHeight}`
-    }
+    metadata: sanitizedMetadata,
   };
 
-  // Also forward step to Google Analytics GA4 if available
-  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+  // Forward step to Google Analytics GA4 only if campaign performance consent is granted
+  if (allowCampaign && typeof window !== 'undefined' && typeof window.gtag === 'function') {
     try {
       window.gtag('event', options.stepName, {
         event_category: 'campaign_journey',
         event_label: options.stepTitle || formatStepTitle(options.stepName),
         step_number: options.stepNumber,
         food_meter: options.foodMeterPercentage,
-        user_location: options.userLocation,
+        user_location: allowLocation ? options.userLocation : undefined,
       });
     } catch {
       // Ignore GA4 errors silently
@@ -177,7 +212,7 @@ export async function trackUserStep(options: TrackStepOptions): Promise<void> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
-      keepalive: true
+      keepalive: true,
     });
   } catch (err) {
     // Non-blocking catch to ensure smooth user experience
@@ -200,7 +235,7 @@ function formatStepTitle(step: string): string {
     relief_done: 'Relief Complete',
     pass: 'Official Tour Pass & Contest',
     map: 'Collective Food Tour Map Explored',
-    tour_restarted: 'Food Tour Restarted'
+    tour_restarted: 'Food Tour Restarted',
   };
   return map[step] || step.replace(/_/g, ' ').toUpperCase();
 }

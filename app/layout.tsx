@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import { BasePathProvider } from "@/components/BasePathProvider";
 import { DynamicTabTitle } from "@/components/DynamicTabTitle";
+import CookieConsentBanner from "@/components/CookieConsentBanner";
 import { withBasePath } from "@/lib/basePath";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://gastrium.in/bhookasur_ka_food_tour';
@@ -77,7 +78,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           }}
         />
 
-        {/* Google tag (gtag.js) */}
+        {/* Google tag (gtag.js) with Consent Mode v2 default */}
         <Script
           strategy="afterInteractive"
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
@@ -89,6 +90,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             __html: `
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
+              gtag('consent', 'default', {
+                analytics_storage: 'denied',
+                ad_storage: 'denied',
+                ad_user_data: 'denied',
+                ad_personalization: 'denied',
+                functionality_storage: 'denied',
+                personalization_storage: 'denied',
+                security_storage: 'granted'
+              });
               gtag('js', new Date());
               gtag('config', '${GA_MEASUREMENT_ID}');
             `,
@@ -109,6 +119,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <BasePathProvider>
           <DynamicTabTitle />
           {children}
+          <CookieConsentBanner />
         </BasePathProvider>
       </body>
     </html>
