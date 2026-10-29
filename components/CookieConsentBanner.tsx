@@ -384,34 +384,6 @@ export default function CookieConsentBanner() {
         </div>
       )}
 
-      {/* Subtle Floating Trigger to Reopen Preference Centre / Withdraw Consent After Banner is Closed */}
-      {!showBanner && (
-        <button
-          type="button"
-          onClick={openPreferenceCentre}
-          title="Cookie Preference Centre & Privacy Policy"
-          className="fixed bottom-3 right-3 z-[9980] inline-flex items-center gap-1.5 bg-[#F7F5EE]/95 hover:bg-[#F7F5EE] text-[#1F2320] border border-[#CCC8B6] rounded-full px-3 py-1.5 text-[11.5px] font-medium shadow-md transition-all hover:shadow-lg cursor-pointer"
-        >
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="shrink-0 text-[#1A62B8]"
-            aria-hidden="true"
-          >
-            <line x1="3" y1="2" x2="3" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="13" y1="2" x2="13" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            <circle cx="3" cy="5.5" r="1.8" fill="#F7F5EE" stroke="currentColor" strokeWidth="1.5" />
-            <circle cx="8" cy="10.5" r="1.8" fill="#F7F5EE" stroke="currentColor" strokeWidth="1.5" />
-            <circle cx="13" cy="6.5" r="1.8" fill="#F7F5EE" stroke="currentColor" strokeWidth="1.5" />
-          </svg>
-          <span className="text-[#1A62B8]">Cookie Preferences</span>
-        </button>
-      )}
-
       {/* Preference Centre Modal */}
       {showPreferenceModal && (
         <div
