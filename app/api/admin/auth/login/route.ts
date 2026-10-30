@@ -95,16 +95,6 @@ export async function POST(request: Request) {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
 
-    // Auto-seed initial hashed accounts if admin_users table is newly created and empty
-    const [[countRow]] = await pool.query<RowDataPacket[]>('SELECT COUNT(*) AS cnt FROM admin_users');
-    if (Number(countRow?.cnt || 0) === 0) {
-      await pool.query(
-        `INSERT IGNORE INTO admin_users (email, password_hash, role, is_active) VALUES
-         ('shweta.k@theimpulsedigital.com', 'sha256$8f4b2e9a1c7d6e3f5a0b4c8d$edb8bc38b33a3ac21b980daeec4d5c21c2e08c3e359e524c2297b73f93401c11', 'super_admin', 1),
-         ('admin@bhookasurkafoodtour.com', 'sha256$3c9e1a7f5b2d8e4c6a1f9b3e$e1972a20056e676f34c663eb28aaf41df91ef5523786222be4215d2a5407fb9b', 'admin', 1)`
-      ).catch(() => {});
-    }
-
     // Query admin_users strictly from the database
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT id, email, password_hash, role, is_active

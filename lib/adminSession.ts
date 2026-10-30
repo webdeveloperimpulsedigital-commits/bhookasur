@@ -46,7 +46,7 @@ export async function createAdminSessionToken(
   const secret = getSigningSecret();
   if (!secret) return null;
   const expiry = Date.now() + ADMIN_SESSION_MAX_AGE_SECONDS * 1000;
-  const cleanUser = encodeURIComponent(email);
+  const cleanUser = encodeURIComponent(email).replace(/\./g, '%2E');
   const payload = `${role}.${cleanUser}.${expiry}`;
   const sig = await hmacHex(secret, `admin:${payload}`);
   return `${payload}.${sig}`;
@@ -58,8 +58,11 @@ export async function verifyAdminSession(token: string | undefined | null): Prom
   if (!secret) return null;
 
   const parts = token.split('.');
-  if (parts.length === 4) {
-    const [roleStr, encodedUser, expiryStr, sig] = parts;
+  if (parts.length >= 4) {
+    const roleStr = parts[0];
+    const sig = parts[parts.length - 1];
+    const expiryStr = parts[parts.length - 2];
+    const encodedUser = parts.slice(1, parts.length - 2).join('.');
     const role: AdminRole = roleStr === 'super_admin' ? 'super_admin' : 'admin';
     const expiry = Number(expiryStr);
     if (!expiryStr || !sig || !Number.isFinite(expiry) || expiry < Date.now()) return null;

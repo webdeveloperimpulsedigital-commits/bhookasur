@@ -250,7 +250,7 @@ export function getDishVisualAssets(dishName?: string, dishImage?: string, resta
     };
   }
 
-  let aiPngUrl = `/api/ai/dish-image?dish=${encodeURIComponent(cleanName)}&restaurant=${encodeURIComponent(restaurantName || '')}&v=v53`;
+  let aiPngUrl = `/api/ai/dish-image?dish=${encodeURIComponent(cleanName)}&restaurant=${encodeURIComponent(restaurantName || '')}&v=v55`;
   // Forward verified remote Swiggy, Zomato CDN, Cloudinary, Google, or Unsplash dish photos
   if (
     dishImage &&
