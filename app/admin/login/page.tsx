@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   ShieldCheck,
   Lock,
-  User,
+  Mail,
   ArrowRight,
   AlertCircle,
   ArrowLeft
@@ -15,7 +15,7 @@ import { withBasePath } from '@/lib/basePath';
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,8 +39,8 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setError(null);
 
-    if (!username.trim() || !password) {
-      setError('Please enter both username and password.');
+    if (!email.trim() || !password) {
+      setError('Please enter both Email ID and password.');
       return;
     }
 
@@ -51,7 +51,7 @@ export default function AdminLoginPage() {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          username: username.trim(),
+          email: email.trim(),
           password
         })
       });
@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
       if (data.success) {
         router.push('/admin');
       } else {
-        setError(data.error || 'Invalid username or password.');
+        setError(data.error || 'Invalid Email ID or password.');
       }
     } catch {
       setError('Network error occurred. Please check server connection.');
@@ -82,7 +82,7 @@ export default function AdminLoginPage() {
         </Link>
       </div>
 
-      {/* Normal Single Login Card */}
+      {/* Private Admin Login Card */}
       <div className="w-full max-w-md rounded-2xl bg-white border border-slate-200 p-7 sm:p-8 shadow-lg relative z-10 flex flex-col gap-6">
         {/* Header */}
         <div className="flex flex-col items-center text-center gap-2">
@@ -93,7 +93,7 @@ export default function AdminLoginPage() {
             Admin Login
           </h1>
           <p className="text-xs text-slate-500">
-            Sign in with your Super Admin or Admin credentials
+            Sign in with your authorized Email ID and password
           </p>
         </div>
 
@@ -108,15 +108,16 @@ export default function AdminLoginPage() {
         {/* Form */}
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-slate-700">Username</label>
+            <label className="text-xs font-bold text-slate-700">Email ID</label>
             <div className="relative flex items-center">
-              <User className="w-4 h-4 text-slate-400 absolute left-3.5" />
+              <Mail className="w-4 h-4 text-slate-400 absolute left-3.5" />
               <input
-                type="text"
+                type="email"
                 required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your admin email"
+                autoComplete="email"
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition"
               />
             </div>
@@ -132,6 +133,7 @@ export default function AdminLoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
+                autoComplete="current-password"
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition"
               />
             </div>

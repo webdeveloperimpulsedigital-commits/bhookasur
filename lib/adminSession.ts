@@ -1,8 +1,9 @@
 /**
  * Signed admin session tokens (HMAC-SHA256 via Web Crypto).
+ * Admin credentials are stored exclusively in the MySQL `admin_users` table (never hardcoded).
  * Supports two distinct roles:
  *  - 'super_admin': Full access (View, Edit, Delete, Export to Excel)
- *  - 'admin': View-only access (Can view dashboard, searches & participants; cannot edit, delete, or export)
+ *  - 'admin': View & Export access (Can view dashboard & export Excel; cannot edit or delete)
  *
  * Works in both the Edge runtime (middleware) and the Node runtime (route handlers).
  */
@@ -18,26 +19,10 @@ export interface AdminSessionInfo {
   username: string;
 }
 
-/** Super Admin credentials (Full access: View, Edit, Delete, Export Excel) */
-export function getSuperAdminCredentials(): { username: string; password: string } {
-  const username = (process.env.SUPER_ADMIN_USERNAME || 'superadmin').trim();
-  const password = (process.env.SUPER_ADMIN_PASSWORD || 'superadmin123').trim();
-  return { username, password };
-}
-
-/** Regular Admin credentials (View-only access) */
-export function getAdminCredentials(): { username: string; password: string } {
-  const username = (process.env.ADMIN_USERNAME || process.env.ADMIN_USER || 'admin').trim();
-  const password = (process.env.ADMIN_PASSWORD || process.env.ADMIN_PASS || 'admin123').trim();
-  return { username, password };
-}
-
 function getSigningSecret(): string {
-  const explicit = process.env.ADMIN_SESSION_SECRET || '';
+  const explicit = (process.env.ADMIN_SESSION_SECRET || '').trim();
   if (explicit) return explicit;
-  const superCreds = getSuperAdminCredentials();
-  const adminCreds = getAdminCredentials();
-  return `bakasur-admin-v2::${superCreds.password}::${adminCreds.password}`;
+  return 'bhookasur-db-admin-hmac-v3-9f8e7d6c5b4a3210';
 }
 
 async function hmacHex(secret: string, message: string): Promise<string> {
@@ -56,12 +41,12 @@ function timingSafeEqualHex(a: string, b: string): boolean {
 
 export async function createAdminSessionToken(
   role: AdminRole = 'admin',
-  username: string = 'admin'
+  email: string = 'admin'
 ): Promise<string | null> {
   const secret = getSigningSecret();
   if (!secret) return null;
   const expiry = Date.now() + ADMIN_SESSION_MAX_AGE_SECONDS * 1000;
-  const cleanUser = encodeURIComponent(username);
+  const cleanUser = encodeURIComponent(email);
   const payload = `${role}.${cleanUser}.${expiry}`;
   const sig = await hmacHex(secret, `admin:${payload}`);
   return `${payload}.${sig}`;
