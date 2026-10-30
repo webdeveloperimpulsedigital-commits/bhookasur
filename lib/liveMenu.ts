@@ -5347,6 +5347,22 @@ export const CUISINE_MENUS: CuisineProfile[] = [
     ]
   },
 
+  // Fresh Juices, Sugarcane Raswanti & Coolers
+  {
+    name: "Fresh Juices, Shakes & Coolers",
+    keywords: ['juice', 'juices', 'juice center', 'juice bar', 'raswanti', 'sugarcane', 'ganne ka ras', 'sharbat', 'cooler', 'mocktail', 'lemonade', 'fresh juice'],
+    dishes: [
+      { name: "Freshly Squeezed Orange Juice", description: "100% pure cold-pressed Nagpur oranges served chilled with pulp and no added sugar.", price: 90, image: "/api/ai/dish-image?dish=Fresh%20Orange%20Juice&v=v57", popularity: 100, rating: 5.0, category: "Desserts & Drinks", is_veg: 1 },
+      { name: "Chilled Watermelon Juice (Tarbooz Ras)", description: "Refreshing ruby-red watermelon juice blended with a hint of black salt and fresh mint leaves.", price: 80, image: "/api/ai/dish-image?dish=Fresh%20Watermelon%20Juice&v=v57", popularity: 99, rating: 5.0, category: "Desserts & Drinks", is_veg: 1 },
+      { name: "Fresh Mosambi (Sweet Lime) Juice", description: "Naturally sweet and vitamin-C rich hand-pressed mosambi juice served ice cold.", price: 85, image: "/api/ai/dish-image?dish=Fresh%20Mosambi%20Juice&v=v57", popularity: 99, rating: 4.9, category: "Desserts & Drinks", is_veg: 1 },
+      { name: "Thick Alphonso Mango Juice", description: "Rich pulpy Ratnagiri Alphonso mango nectar served chilled in a tall glass.", price: 110, image: "/api/ai/dish-image?dish=Fresh%20Mango%20Juice&v=v57", popularity: 98, rating: 4.9, category: "Desserts & Drinks", is_veg: 1 },
+      { name: "Fresh Chilled Sugarcane Juice (Ganne Ka Ras)", description: "Crushed fresh sugarcane juice pressed with ginger, lemon, and mint leaves.", price: 40, image: "/api/ai/dish-image?dish=Sugarcane%20Juice&v=v57", popularity: 100, rating: 5.0, category: "Desserts & Drinks", is_veg: 1 },
+      { name: "Fresh Mint Mojito & Lime Cooler", description: "Muddled garden mint leaves, fresh lime wedges, crushed ice, and sparkling lemon refresher.", price: 100, image: "/api/ai/dish-image?dish=Virgin%20Mojito&v=v57", popularity: 98, rating: 4.9, category: "Desserts & Drinks", is_veg: 1 },
+      { name: "Mixed Fruit Cocktail Juice", description: "Energizing blend of fresh pineapple, sweet orange, pomegranate, and apple juices.", price: 110, image: "/api/ai/dish-image?dish=Mixed%20Fruit%20Juice&v=v57", popularity: 97, rating: 4.8, category: "Desserts & Drinks", is_veg: 1 },
+      { name: "Fresh Anar (Pomegranate) Juice", description: "Pure cold-pressed ruby pomegranate seeds packed with natural antioxidants.", price: 130, image: "/api/ai/dish-image?dish=Pomegranate%20Juice&v=v57", popularity: 97, rating: 4.8, category: "Desserts & Drinks", is_veg: 1 }
+    ]
+  },
+
   // Paratha House & North Indian Tandoor
   {
     name: "Paratha House & North Indian Tandoor",
@@ -5649,7 +5665,7 @@ export function generateLiveMenuForRestaurant(restaurant: { id: number; name: st
     const imgParam = item.image && (item.image.startsWith('http://') || item.image.startsWith('https://')) && (item.image.includes('swiggy.com') || item.image.includes('cloudinary.com'))
       ? `&imgUrl=${encodeURIComponent(item.image)}`
       : '';
-    const aiFoodPngUrl = withBasePath(`/api/ai/dish-image?dish=${encodeURIComponent(dishName)}&restaurant=${encodeURIComponent(restaurant.name)}${imgParam}&v=v47`);
+    const aiFoodPngUrl = withBasePath(`/api/ai/dish-image?dish=${encodeURIComponent(dishName)}&restaurant=${encodeURIComponent(restaurant.name)}${imgParam}&v=v57`);
 
     const dynamicRating = idx === 0 ? 5.0 : idx === 1 ? 4.95 : idx === 2 ? 4.9 : (item.rating || 4.7);
     const dynamicPopularity = idx < 3 ? (100 - idx) : (item.popularity || 90);

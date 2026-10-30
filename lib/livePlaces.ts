@@ -56,6 +56,12 @@ export function pickCuisineImage(name: string): string {
   if (n.includes('burger')) {
     return '/images/food/zinger_burger.jpg';
   }
+  if (n.includes('paratha') || n.includes('parantha') || n.includes('chaitanya')) {
+    return '/images/food/paratha.jpg';
+  }
+  if (n.includes('juice') || n.includes('raswanti')) {
+    return '/images/food/fruit_juice.jpg';
+  }
   if (n.includes('mastani') || n.includes('sujata')) {
     return '/images/food/mango_mastani.jpg';
   }
