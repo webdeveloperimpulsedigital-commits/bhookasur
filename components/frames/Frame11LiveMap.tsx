@@ -239,7 +239,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
         <div className="shrink-0 pt-1 flex items-center justify-between">
           {onBack ? (
             <button
-              id="btn-frame11-mobile-back"
+              id="btn-frame11-back"
               onClick={onBack}
               type="button"
               className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 text-white font-black text-xs shadow-md border border-slate-700 active:scale-95 transition-all cursor-pointer mb-1"
@@ -292,7 +292,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
         {/* Primary CTA: EK AUR FOOD STOP JODO */}
         <div className="w-full shrink-0">
           <button
-            id="btn-frame11-mobile-suggest-spot"
+            id="btn-frame11-suggest-spot"
             onClick={onSuggestAnotherSpot}
             type="button"
             className="w-full py-2.5 sm:py-3 px-5 rounded-2xl bg-[#D4380D] hover:bg-[#ba300a] text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-md shadow-[#D4380D]/30 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer border-0"
@@ -304,7 +304,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
         {/* Register CTA: LIVE FOOD TOUR KE LIYE REGISTER KARO */}
         <div className="w-full shrink-0">
           <button
-            id="btn-frame11-mobile-register"
+            id="btn-frame11-register"
             onClick={handleOpenRegistration}
             type="button"
             className="w-full py-2.5 px-4 rounded-2xl bg-white hover:bg-slate-50 text-[#0B1B48] border-2 border-[#0B1B48] font-black text-xs sm:text-sm uppercase tracking-wide active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
@@ -319,7 +319,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
         {/* Sharing CTA (Positioned right after register): SHARE ON WHATSAPP / INSTA */}
         <div className="w-full pb-1 shrink-0">
           <button
-            id="btn-frame11-mobile-share"
+            id="btn-frame11-share"
             onClick={() => setIsShareModalOpen(true)}
             type="button"
             className="w-full py-2.5 sm:py-3 px-5 rounded-2xl bg-[#00A859] hover:bg-[#00914c] text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-md shadow-[#00A859]/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
@@ -380,7 +380,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
           {/* Primary CTA: EK AUR FOOD STOP JODO */}
           <div className="w-full pt-1">
             <button
-              id="btn-frame11-desktop-suggest-spot"
+              id="btn-frame11-suggest-spot"
               onClick={onSuggestAnotherSpot}
               type="button"
               className="w-full py-3.5 px-6 rounded-2xl bg-[#D4380D] hover:bg-[#ba300a] text-white font-black text-sm lg:text-base uppercase tracking-wider shadow-lg shadow-[#D4380D]/30 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer border-0"
@@ -392,7 +392,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
           {/* Register CTA: REGISTER NOW AND GET CHANCE TO WIN ZOMATO VOUCHER */}
           <div className="w-full">
             <button
-              id="btn-frame11-desktop-register"
+              id="btn-frame11-register"
               onClick={handleOpenRegistration}
               type="button"
               className="w-full py-3 px-6 rounded-2xl bg-white hover:bg-slate-50 text-[#0B1B48] border-2 border-[#0B1B48] font-black text-xs lg:text-sm uppercase tracking-wide active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs text-center"
@@ -407,7 +407,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
           {/* Sharing CTA (Positioned right after register): SHARE ON WHATSAPP / INSTA */}
           <div className="w-full">
             <button
-              id="btn-frame11-desktop-share"
+              id="btn-frame11-share"
               onClick={() => setIsShareModalOpen(true)}
               type="button"
               className="w-full py-3.5 px-6 rounded-2xl bg-[#00A859] hover:bg-[#00914c] text-white font-black text-sm lg:text-base uppercase tracking-wider shadow-md shadow-[#00A859]/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
