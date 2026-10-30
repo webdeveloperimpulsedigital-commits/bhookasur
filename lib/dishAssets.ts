@@ -242,16 +242,19 @@ export function isPureVegRestaurantName(restaurantName?: string): boolean {
 export function getDishVisualAssets(dishName?: string, dishImage?: string, restaurantName?: string): DishVisualAssets {
   const cleanName = formatCleanDishName(dishName, restaurantName);
 
-  // 1. If dishImage is already a fully formed AI endpoint URL specifically for this dish
+  // 1. If dishImage is already a fully formed AI endpoint URL specifically for this dish, upgrade its cache version to v57
   if (dishImage && (dishImage.startsWith('/api/ai/dish-image') || dishImage.includes('/api/ai/dish-image'))) {
+    const upgradedUrl = dishImage.includes('&v=')
+      ? dishImage.replace(/&v=[^&]+/, '&v=v57')
+      : `${dishImage}&v=v57`;
     return {
-      plateImage: withBasePath(dishImage),
-      flyingImage: withBasePath(dishImage)
+      plateImage: withBasePath(upgradedUrl),
+      flyingImage: withBasePath(upgradedUrl)
     };
   }
 
-  let aiPngUrl = `/api/ai/dish-image?dish=${encodeURIComponent(cleanName)}&restaurant=${encodeURIComponent(restaurantName || '')}&v=v53`;
-  // Forward verified remote Swiggy, Zomato CDN, Cloudinary, Google, or Unsplash dish photos
+  let aiPngUrl = `/api/ai/dish-image?dish=${encodeURIComponent(cleanName)}&restaurant=${encodeURIComponent(restaurantName || '')}&v=v57`;
+  // Forward verified remote Swiggy, Zomato CDN, Cloudinary, or Google dish photos (ignore generic Unsplash placeholders)
   if (
     dishImage &&
     (dishImage.startsWith('http://') || dishImage.startsWith('https://')) &&
@@ -260,8 +263,7 @@ export function getDishVisualAssets(dishName?: string, dishImage?: string, resta
       dishImage.includes('cloudinary.com') ||
       dishImage.includes('zmtcdn.com') ||
       dishImage.includes('zomato.com') ||
-      dishImage.includes('googleusercontent.com') ||
-      dishImage.includes('unsplash.com')
+      dishImage.includes('googleusercontent.com')
     )
   ) {
     aiPngUrl += `&imgUrl=${encodeURIComponent(dishImage)}`;
@@ -353,7 +355,18 @@ export function isDishRelevantToSearch(dishTitle?: string, userQuery?: string): 
     dhokal: 'dhokla',
     dhoklaa: 'dhokla',
     dhokle: 'dhokla',
-    khamandhokla: 'khaman dhokla'
+    khamandhokla: 'khaman dhokla',
+    parantha: 'paratha',
+    paranthas: 'paratha',
+    parathas: 'paratha',
+    parotta: 'paratha',
+    porotta: 'paratha',
+    lachha: 'laccha',
+    lacha: 'laccha',
+    gobhi: 'gobi',
+    alu: 'aloo',
+    juices: 'juice',
+    sarbat: 'sharbat'
   };
 
   const normalize = (str: string) => {
@@ -611,6 +624,41 @@ export function isDishRelevantToSearch(dishTitle?: string, userQuery?: string): 
   const isKajuQuery = q.includes('kaju') || q.includes('cashew');
   if (isKajuQuery) {
     return d.includes('kaju') || d.includes('cashew');
+  }
+
+  // === 13.7 Paratha / Parantha / Parotta Varieties ===
+  if (q.includes('paratha')) {
+    if (!d.includes('paratha') || d.includes('roll') || d.includes('wrap') || d.includes('frankie')) {
+      return false;
+    }
+    if (q.includes('aloo') && !d.includes('aloo')) return false;
+    if (q.includes('paneer') && !d.includes('paneer')) return false;
+    if (q.includes('gobi') && !d.includes('gobi')) return false;
+    if (q.includes('laccha') && !d.includes('laccha') && !d.includes('layered')) return false;
+    if (q.includes('methi') && !d.includes('methi')) return false;
+    return true;
+  }
+
+  // === 13.8 Fresh Juices, Sugarcane Juice, Lemonade & Coolers ===
+  if (q.includes('juice') || q.includes('sharbat') || q.includes('lemonade') || q.includes('sugarcane')) {
+    const isDishJuiceOrRefresher =
+      d.includes('juice') ||
+      d.includes('sharbat') ||
+      d.includes('lemonade') ||
+      d.includes('sugarcane') ||
+      d.includes('ganne ka ras') ||
+      d.includes('usacha ras') ||
+      d.includes('fresh lime') ||
+      d.includes('nimbu pani') ||
+      d.includes('shikanji') ||
+      d.includes('mojito') ||
+      d.includes('cooler');
+    if (!isDishJuiceOrRefresher) return false;
+    if (q.includes('sugarcane') && !d.includes('sugarcane') && !d.includes('ganne') && !d.includes('usacha')) return false;
+    if (q.includes('watermelon') && !d.includes('watermelon') && !d.includes('tarbooz') && !d.includes('kalingad')) return false;
+    if (q.includes('orange') && !d.includes('orange') && !d.includes('mosambi') && !d.includes('santra')) return false;
+    if (q.includes('mango') && !d.includes('mango') && !d.includes('aam')) return false;
+    return true;
   }
 
   // === 14. General Food Queries (Biryani, Pizza, Burger, Dosa, Idli, Pulao, Mastani, Falooda, etc.) ===

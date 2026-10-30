@@ -58,7 +58,7 @@ export default function AdminLoginPage() {
 
       const data = await res.json();
       if (data.success) {
-        router.push('/admin');
+        window.location.href = withBasePath('/admin');
       } else {
         setError(data.error || 'Invalid Email ID or password.');
       }

@@ -8,7 +8,7 @@ import { generateDishImageOnline } from '@/lib/geminiImageGenerator';
 export const dynamic = 'force-dynamic';
 
 // Cache key salt to instantly bust any previous stale in-memory cached buffers
-const CACHE_VERSION = 'v53_live_dish_photo_fix';
+const CACHE_VERSION = 'v57_paratha_and_juice_fix';
 const imageBufferCache = new Map<string, { buffer: Buffer; contentType: string; timestamp: number }>();
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -136,7 +136,9 @@ const CANONICAL_LOCAL_ASSETS: Record<string, string> = {
   bangda_fry: 'fish_fry.jpg',
   surmai_fry: 'fish_fry.jpg',
   pomfret_fry: 'fish_fry.jpg',
-  bombil_fry: 'fish_fry.jpg',
+  bombil_fry: 'bombil_fry.jpg',
+  tisrya_masala: 'tisrya_masala.jpg',
+  chicken_sukka: 'chicken_sukka.jpg',
   kolambi_bhaat: 'chicken_pulao.jpg',
   masala_taak: 'masala_taak.jpg',
   taak: 'masala_taak.jpg',
@@ -318,7 +320,10 @@ const CANONICAL_LOCAL_ASSETS: Record<string, string> = {
   // Poultry, Tandoori & Platters
   butter_chicken: 'butter_chicken.jpg',
   tandoori_chicken: 'tandoori_chicken.jpg',
-  chicken_tikka: 'tandoori_chicken.jpg',
+  chicken_tikka: 'chicken_tikka.jpg',
+  chicken_malai_tikka: 'chicken_malai_tikka.jpg',
+  chicken_65: 'chicken_65.jpg',
+  bbq_chicken_wings: 'chicken_wings.jpg',
   non_veg_platter: 'non_veg_platter.jpg',
   tandoori_non_veg_platter: 'non_veg_platter.jpg',
   kebab_platter: 'non_veg_platter.jpg',
@@ -374,15 +379,32 @@ const CANONICAL_LOCAL_ASSETS: Record<string, string> = {
   kulfi: 'kulfi.jpg',
   falooda: 'falooda.jpg',
 
-  // Sandwiches & Wraps
-  club_sandwich: 'sandwich.jpg',
-  cheese_sandwich: 'sandwich.jpg',
+  // Sandwiches, Toasts, Panini, Mediterranean & Wraps
+  club_sandwich: 'club_sandwich.jpg',
+  cheese_sandwich: 'cheese_sandwich.jpg',
   veg_sandwich: 'sandwich.jpg',
-  chicken_sandwich: 'sandwich.jpg',
-  grilled_sandwich: 'sandwich.jpg',
+  chicken_sandwich: 'club_sandwich.jpg',
+  grilled_sandwich: 'cheese_sandwich.jpg',
   bun_maska: 'sandwich.jpg',
-  chicken_wrap: 'kathi_roll.jpg',
+  chicken_wrap: 'chicken_shawarma.jpg',
   paneer_wrap: 'kathi_roll.jpg',
+  panini: 'panini.jpg',
+  philly_cheesesteak: 'philly_cheesesteak.jpg',
+  avocado_toast: 'avocado_toast.jpg',
+  egg_mayo_sandwich: 'egg_mayo_sandwich.jpg',
+  katsu_sando: 'katsu_sando.jpg',
+  tamago_sando: 'tamago_sando.jpg',
+  gyro_pita: 'gyro_pita.jpg',
+  chicken_shawarma: 'chicken_shawarma.jpg',
+  turkish_pide: 'turkish_pide.jpg',
+  bruschetta: 'bruschetta.jpg',
+  cheese_bread_balls: 'cheese_bread_balls.jpg',
+  stuffed_garlic_bread: 'stuffed_garlic_bread.jpg',
+  croissant: 'croissant.jpg',
+  cinnamon_rolls: 'cinnamon_rolls.jpg',
+  chocolate_babka: 'chocolate_babka.jpg',
+  korean_garlic_bread: 'korean_garlic_bread.jpg',
+  hot_dog: 'hot_dog_bun.jpg',
 
   // Fast Food & Burgers
   aloo_tikki_burger: 'burger.jpg',
@@ -390,15 +412,19 @@ const CANONICAL_LOCAL_ASSETS: Record<string, string> = {
   fish_burger: 'crispy_chicken_burger.jpg',
   chicken_burger: 'crispy_chicken_burger.jpg',
 
-  // Coolers, Mojitos & Refreshers
-  rose_lychee_cooler: 'solkadhi.jpg',
-  strawberry_coconut_cooler: 'solkadhi.jpg',
-  cooler: 'solkadhi.jpg',
-  mojito: 'masala_taak.jpg',
-  virgin_mojito: 'masala_taak.jpg',
-  mint_mojito: 'masala_taak.jpg',
-  fruit_juice: 'solkadhi.jpg',
-  lemonade: 'solkadhi.jpg',
+  // Coolers, Mojitos, Juices & Refreshers
+  rose_lychee_cooler: 'lemonade.jpg',
+  strawberry_coconut_cooler: 'lemonade.jpg',
+  cooler: 'lemonade.jpg',
+  mojito: 'lemonade.jpg',
+  virgin_mojito: 'lemonade.jpg',
+  mint_mojito: 'lemonade.jpg',
+  fruit_juice: 'fruit_juice.jpg',
+  orange_juice: 'orange_juice.jpg',
+  watermelon_juice: 'watermelon_juice.jpg',
+  mango_juice: 'mango_juice.jpg',
+  sugarcane_juice: 'sugarcane_juice.jpg',
+  lemonade: 'lemonade.jpg',
   milkshakes: 'vanilla_ice_cream.jpg',
   milkshake: 'vanilla_ice_cream.jpg',
   smoothie: 'mango_mastani.jpg',
@@ -421,17 +447,38 @@ const CANONICAL_LOCAL_ASSETS: Record<string, string> = {
   schezwan_noodles: 'fried_rice.jpg',
   chinese_bhel: 'oli_bhel.jpg',
 
-  // Breads & Roti
+  // Breads, Bakery Loaves, Artisan Breads, Buns, Rolls & Roti
   roti: 'butter_naan.jpg',
   butter_roti: 'butter_naan.jpg',
   tandoori_roti: 'butter_naan.jpg',
   chapati: 'bhakri.jpg',
   phulka: 'bhakri.jpg',
-  kulcha: 'butter_naan.jpg',
-  aloo_paratha: 'paratha.jpg',
+  kulcha: 'kulcha.jpg',
+  aloo_paratha: 'aloo_paratha.jpg',
   paneer_paratha: 'paratha.jpg',
-  laccha_paratha: 'paratha.jpg',
-  gobi_paratha: 'paratha.jpg',
+  laccha_paratha: 'laccha_paratha.jpg',
+  kerala_parotta: 'laccha_paratha.jpg',
+  gobi_paratha: 'aloo_paratha.jpg',
+  white_bread: 'white_bread.jpg',
+  brown_bread: 'brown_bread.jpg',
+  multigrain_bread: 'multigrain_bread.jpg',
+  ladi_pav: 'ladi_pav.jpg',
+  baguette: 'baguette.jpg',
+  artisan_bread: 'artisan_bread.jpg',
+  sourdough_bread: 'sourdough_bread.jpg',
+  focaccia: 'focaccia.jpg',
+  pita_bread: 'pita_bread.jpg',
+  burger_bun: 'burger_bun.jpg',
+  hot_dog_bun: 'hot_dog_bun.jpg',
+  sub_roll: 'sub_roll.jpg',
+  bagel: 'bagel.jpg',
+  dinner_roll: 'dinner_roll.jpg',
+  cinnamon_bread: 'cinnamon_bread.jpg',
+  chocolate_bread: 'chocolate_bread.jpg',
+  banana_bread: 'banana_bread.jpg',
+  shokupan: 'shokupan.jpg',
+  bao_bun: 'bao_bun.jpg',
+  roti_canai: 'roti_canai.jpg',
 
   // Rice & Biryani
   steamed_rice: 'varan_bhat.jpg',
@@ -445,23 +492,38 @@ const CANONICAL_LOCAL_ASSETS: Record<string, string> = {
   prawn_biryani: 'biryani.jpg',
   chicken_fried_rice: 'fried_rice.jpg',
 
-  // Snacks & Breakfast
+  // Snacks, Non-Veg Starters & Breakfast
   upma: 'poha.jpg',
   dabeli: 'vada_pav.jpg',
-  chicken_seekh_kebab: 'non_veg_platter.jpg',
-  mutton_seekh_kebab: 'non_veg_platter.jpg',
+  chicken_seekh_kebab: 'chicken_tikka.jpg',
+  mutton_seekh_kebab: 'mutton_seekh_kebab.jpg',
+  mutton_shami_kebab: 'mutton_shami_kebab.jpg',
+  mutton_galouti_kebab: 'mutton_galouti_kebab.jpg',
   veg_seekh_kebab: 'veg_platter.jpg',
   hara_bhara_kebab: 'veg_platter.jpg',
   tandoori_mushroom: 'veg_platter.jpg',
-  fish_tikka: 'fish_fry.jpg',
-  prawn_fry: 'fish_fry.jpg',
-  butter_garlic_prawns: 'fish_fry.jpg',
-  french_toast: 'sandwich.jpg',
+  amritsari_fish: 'amritsari_fish.jpg',
+  fish_tikka: 'fish_tikka.jpg',
+  tandoori_fish: 'fish_tikka.jpg',
+  fish_fingers: 'fish_fingers.jpg',
+  prawn_fry: 'prawns_koliwada.jpg',
+  prawns_koliwada: 'prawns_koliwada.jpg',
+  tandoori_prawns: 'tandoori_prawns.jpg',
+  chilli_garlic_prawns: 'chilli_garlic_prawns.jpg',
+  butter_garlic_prawns: 'chilli_garlic_prawns.jpg',
+  prawn_masala: 'prawns_koliwada.jpg',
+  crab_masala: 'prawns_koliwada.jpg',
+  fish_curry: 'fish_fry.jpg',
+  chicken_momos: 'momos.jpg',
+  dragon_chicken: 'chicken_65.jpg',
+  nachos: 'peri_peri_fries.jpg',
+  egg_starter: 'egg_starter.jpg',
+  french_toast: 'french_toast.jpg',
   bread_omelette: 'tomato_omelette.jpg',
   cheese_omelette: 'tomato_omelette.jpg',
   scrambled_eggs: 'tomato_omelette.jpg',
-  boiled_eggs: 'tomato_omelette.jpg',
-  egg_dish: 'tomato_omelette.jpg',
+  boiled_eggs: 'egg_starter.jpg',
+  egg_dish: 'egg_starter.jpg',
   egg_curry: 'chicken_curry.jpg',
   egg_biryani: 'biryani.jpg',
   chicken_tikka_masala: 'butter_chicken.jpg',
@@ -939,6 +1001,7 @@ function inferCulinaryCategory(dishName: string, restaurantName: string = ''): s
   if (
     d.includes('tea') || d.includes('chai') || d.includes('coffee') || d.includes('shake') ||
     d.includes('juice') || d.includes('drink') || d.includes('cooler') || d.includes('mojito') ||
+    d.includes('lemonade') || d.includes('sharbat') || d.includes('sugarcane') ||
     d.includes('lassi') || d.includes('taak') || d.includes('chaas') || d.includes('solkadhi') ||
     d.includes('ice cream') || d.includes('icecream') || d.includes('kulfi') || d.includes('falooda') ||
     d.includes('mastani') ||
@@ -949,14 +1012,19 @@ function inferCulinaryCategory(dishName: string, restaurantName: string = ''): s
     if (d.includes('mastani')) return 'mango_mastani';
     if (d.includes('lassi')) return 'punjabi_lassi';
     if (d.includes('taak') || d.includes('chaas') || d.includes('solkadhi')) return 'solkadhi';
+    if (d.includes('sugarcane') || d.includes('ganne')) return 'sugarcane_juice';
+    if (d.includes('lemonade') || d.includes('mojito') || d.includes('cooler') || d.includes('lime') || d.includes('nimbu') || d.includes('shikanji')) return 'lemonade';
+    if (d.includes('juice') || d.includes('sharbat') || d.includes('drink')) return 'fruit_juice';
     return 'chai';
   }
 
   // 9. Breads & Roti
   if (
     d.includes('roti') || d.includes('naan') || d.includes('kulcha') || d.includes('paratha') ||
+    d.includes('parantha') || d.includes('parotta') || d.includes('porotta') ||
     d.includes('bhakri') || d.includes('thepla') || d.includes('chapati') || d.includes('phulka')
   ) {
+    if (d.includes('paratha') || d.includes('parantha') || d.includes('parotta') || d.includes('porotta')) return 'paratha';
     if (d.includes('bhakri') || d.includes('thepla')) return 'bhakri';
     return 'butter_naan';
   }
@@ -1069,9 +1137,9 @@ function matchDishToCanonicalKey(dishName: string, restaurantName: string = ''):
     return 'solkadhi';
   }
   if (
-    (!d.includes('pancake') && !d.includes('waffle') && !d.includes('biscuit')) &&
+    (!d.includes('pancake') && !d.includes('waffle') && !d.includes('biscuit') && !d.includes('paratha') && !d.includes('parantha') && !d.includes('taka tak')) &&
     (
-      d.includes('taak') || d.includes('tak') || d.includes('mattha') ||
+      /\btaak\b/.test(d) || /\btak\b/.test(d) || d.includes('mattha') ||
       d.includes('matha') || d.includes('chaas') || d.includes('chhas') || d.includes('chhaas') ||
       d.includes('buttermilk') || d.includes('butter milk') || d.includes('masala curd') ||
       d.includes('majjiga') || d.includes('sambharam') || d.includes('neer mor') || d.includes('moru')
@@ -1080,8 +1148,8 @@ function matchDishToCanonicalKey(dishName: string, restaurantName: string = ''):
     return 'masala_taak';
   }
   if (
-    /\blassi\b/.test(d) || /\blasi\b/.test(d) ||
-    (d.includes('punjabi') && (d.includes('sweet') || d.includes('curd') || d.includes('malai') || d.includes('yogurt')))
+    (/\blassi\b/.test(d) || /\blasi\b/.test(d)) &&
+    !d.includes('paratha') && !d.includes('parantha') && !d.includes('thali')
   ) {
     return 'punjabi_lassi';
   }
@@ -1091,7 +1159,7 @@ function matchDishToCanonicalKey(dishName: string, restaurantName: string = ''):
   if (d.includes('lemon tea')) return 'lemon_tea';
   if (d.includes('iced tea')) return 'iced_tea';
   if (
-    d.includes('chai') || d.includes('chaha') ||
+    /\bchai\b/.test(d) || /\bchaha\b/.test(d) ||
     (/\btea\b/.test(d) && !d.includes('steam')) ||
     d.includes('masala tea') || d.includes('cutting chai') || d.includes('irani chai') ||
     d.includes('ginger tea')
@@ -1117,8 +1185,75 @@ function matchDishToCanonicalKey(dishName: string, restaurantName: string = ''):
   // Cafe Beverages & Shakes
   if (d.includes('hot chocolate') || d.includes('hot cocoa')) return 'hot_chocolate';
 
+  // Specific Fresh Fruit Juices, Sugarcane Juice, Lemonade, Mojitos & Coolers (Before restaurant-level Mastani checks)
+  if (
+    d.includes('sugarcane') || d.includes('sugar cane') ||
+    d.includes('ganne ka ras') || d.includes('ganna ras') || d.includes('ganne ras') ||
+    d.includes('usacha ras') || d.includes('cane juice') || d.includes('raswanti')
+  ) {
+    return 'sugarcane_juice';
+  }
+  if (
+    (d.includes('watermelon') || d.includes('water melon') || d.includes('tarbooz') || d.includes('kalingad') ||
+     d.includes('pomegranate') || d.includes('anar') || d.includes('cranberry') || d.includes('strawberry juice') ||
+     d.includes('beetroot juice') || d.includes('kokum sharbat') || d.includes('kokam sharbat') || d.includes('rooh afza')) &&
+    !d.includes('salad') && !d.includes('ice cream') && !d.includes('mastani')
+  ) {
+    return 'watermelon_juice';
+  }
+  if (
+    (d.includes('mango juice') || d.includes('aam juice') || d.includes('pineapple juice') || d.includes('ananas juice') ||
+     d.includes('mango drink') || d.includes('maaza') || d.includes('slice') || d.includes('frooti') ||
+     (d.includes('mango') && (d.includes('juice') || d.includes('sharbat') || d.includes('nectar') || d.includes('crush'))) ||
+     (d.includes('pineapple') && (d.includes('juice') || d.includes('sharbat') || d.includes('cooler')))) &&
+    !d.includes('lassi') && !d.includes('mastani') && !d.includes('shake') && !d.includes('aamras')
+  ) {
+    return 'mango_juice';
+  }
+  if (
+    (d.includes('orange juice') || d.includes('mosambi') || d.includes('mousambi') || d.includes('musambi') ||
+     d.includes('sweet lime') || d.includes('santra') || d.includes('malta') || d.includes('citrus juice') ||
+     d.includes('tangerine') || (d.includes('orange') && (d.includes('juice') || d.includes('drink') || d.includes('cooler') || d.includes('sharbat') || d.includes('fresh')))) &&
+    !d.includes('ice cream') && !d.includes('cake') && !d.includes('chicken')
+  ) {
+    return 'orange_juice';
+  }
+  if (d.includes('rose lychee') || (d.includes('lychee') && (d.includes('cooler') || d.includes('drink') || d.includes('juice')))) {
+    return 'rose_lychee_cooler';
+  }
+  if (d.includes('strawberry coconut') || (d.includes('coconut') && (d.includes('cooler') || d.includes('drink')))) {
+    return 'strawberry_coconut_cooler';
+  }
+  if (
+    d.includes('mojito') || d.includes('virgin mojito') || d.includes('mint mojito') ||
+    d.includes('lemonade') || d.includes('fresh lime') || d.includes('lime soda') ||
+    d.includes('lime water') || d.includes('nimbu pani') || d.includes('nimbu sharbat') ||
+    d.includes('limbu pani') || d.includes('limbu sarbat') || d.includes('shikanji') ||
+    d.includes('jaljeera') || d.includes('jal jeera') || d.includes('mint cooler') ||
+    d.includes('kala khatta') || d.includes('aam panna') || d.includes('kairi panha') ||
+    d.includes('panha') || d.includes('cooler') || d.includes('mocktail') || d.includes('refresher')
+  ) {
+    return 'lemonade';
+  }
+  if (d.includes('smoothie')) return 'smoothies';
+  if (d.includes('milkshake') || (d.includes('shake') && !d.includes('mastani'))) return 'milkshakes';
+  if (
+    d.includes('juice') || d.includes('sharbat') || d.includes('sarbat') ||
+    d.includes('squash') || d.includes('crush') || d.includes('fruit punch') ||
+    d.includes('cold drink') || d.includes('pepsi') || d.includes('coke') || d.includes('coca cola') ||
+    d.includes('sprite') || d.includes('thums up') || d.includes('fanta') || d.includes('mirinda') ||
+    d.includes('soda') || d.includes('water bottle') || d.includes('mineral water') || d.includes('kinley') ||
+    d.includes('aquafina') || d.includes('bisleri') || d.includes('nariyal pani') || d.includes('tender coconut') ||
+    d.includes('coconut water')
+  ) {
+    return 'fruit_juice';
+  }
+
   // Authentic Pune Mastani Varieties (Strictly mapped by flavor, restaurant & dish context)
-  if (d.includes('mastani') || r.includes('mastani') || r.includes('sujata')) {
+  if (
+    d.includes('mastani') ||
+    ((r.includes('mastani') || r.includes('sujata')) && !d.includes('paratha') && !d.includes('parantha') && !d.includes('pizza') && !d.includes('burger') && !d.includes('sandwich') && !d.includes('dosa') && !d.includes('biryani'))
+  ) {
     if (d.includes('falooda') || d.includes('faluda')) return 'falooda';
     if (d.includes('kulfi')) return 'kulfi';
     if (d.includes('chocolate') || d.includes('brownie') || d.includes('fudge') || d.includes('cocoa') || d.includes('dark')) return 'chocolate_mastani';
@@ -1129,31 +1264,6 @@ function matchDishToCanonicalKey(dishName: string, restaurantName: string = ''):
     if (d.includes('rose') || d.includes('gulkand')) return 'rose_mastani';
     if (d.includes('butterscotch') || d.includes('caramel')) return 'butterscotch_mastani';
     return 'mango_mastani';
-  }
-
-  // Coolers, Mojitos, Mocktails, Drinks & Refreshers
-  if (d.includes('rose lychee') || (d.includes('lychee') && (d.includes('cooler') || d.includes('drink')))) {
-    return 'rose_lychee_cooler';
-  }
-  if (d.includes('strawberry coconut') || (d.includes('coconut') && (d.includes('cooler') || d.includes('drink')))) {
-    return 'strawberry_coconut_cooler';
-  }
-  if (d.includes('mojito') || d.includes('virgin mojito') || d.includes('mint mojito')) {
-    return 'virgin_mojito';
-  }
-  if (d.includes('cooler') || d.includes('mocktail') || d.includes('refresher') || d.includes('crush') || d.includes('squash')) {
-    return 'rose_lychee_cooler';
-  }
-  if (d.includes('smoothie')) return 'smoothies';
-  if (d.includes('milkshake') || d.includes('shake')) return 'milkshakes';
-  if (
-    d.includes('juice') || d.includes('fresh lime') || d.includes('lemonade') || d.includes('sharbat') ||
-    d.includes('cold drink') || d.includes('pepsi') || d.includes('coke') || d.includes('coca cola') ||
-    d.includes('sprite') || d.includes('thums up') || d.includes('fanta') || d.includes('mirinda') ||
-    d.includes('soda') || d.includes('water bottle') || d.includes('mineral water') || d.includes('kinley') ||
-    d.includes('aquafina') || d.includes('bisleri')
-  ) {
-    return 'fruit_juice';
   }
 
   // === 0b. AUTHENTIC MAHARASHTRIAN MAIN COURSES, SPECIALTIES & SWEETS ===
@@ -1400,12 +1510,17 @@ function matchDishToCanonicalKey(dishName: string, restaurantName: string = ''):
   }
   if (d.includes('dabeli') || d.includes('kutchi dabeli')) return 'dabeli';
 
-  // Kanda Bhaji / Onion Pakoda (Strictly crispy onion fritters)
+  // Kanda Bhaji / Onion Pakoda (Strictly crispy vegetarian onion fritters, never non-veg pakodas)
   if (
-    d.includes('kanda bhaji') || d.includes('kanda bhajji') || d.includes('khekda bhaji') ||
-    d.includes('kanda pakoda') || d.includes('kanda bhajiya') || d.includes('onion pakoda') ||
-    d.includes('onion bhaji') || d.includes('pyaz pakoda') ||
-    (d.includes('bhajiya') || d.includes('pakoda') || d.includes('bhajji'))
+    !d.includes('chicken') && !d.includes('fish') && !d.includes('prawn') &&
+    !d.includes('egg') && !d.includes('anda') && !d.includes('mutton') &&
+    !d.includes('crab') && !d.includes('squid') &&
+    (
+      d.includes('kanda bhaji') || d.includes('kanda bhajji') || d.includes('khekda bhaji') ||
+      d.includes('kanda pakoda') || d.includes('kanda bhajiya') || d.includes('onion pakoda') ||
+      d.includes('onion bhaji') || d.includes('pyaz pakoda') ||
+      (d.includes('bhajiya') || d.includes('pakoda') || d.includes('bhajji'))
+    )
   ) {
     return 'kanda_bhaji';
   }
@@ -1442,15 +1557,16 @@ function matchDishToCanonicalKey(dishName: string, restaurantName: string = ''):
     d.includes('kfc') ||
     d.includes('fried chicken') ||
     d.includes('crispy chicken') ||
+    d.includes('chicken crispy') ||
     d.includes('chicken popcorn') ||
     d.includes('popcorn chicken') ||
     d.includes('chicken strips') ||
     d.includes('chicken tenders') ||
     d.includes('chicken bucket') ||
     d.includes('hot wings') ||
+    d.includes('buffalo wings') ||
     d.includes('zinger') ||
-    r.includes('kfc') ||
-    r.includes('kentucky')
+    ((r.includes('kfc') || r.includes('kentucky')) && !d.includes('paratha') && !d.includes('parantha') && !d.includes('juice'))
   ) {
     if (d.includes('zinger') || d.includes('burger')) return 'zinger_burger';
     if (d.includes('popcorn')) return 'chicken_popcorn';
@@ -1458,10 +1574,283 @@ function matchDishToCanonicalKey(dishName: string, restaurantName: string = ''):
     if (d.includes('wing')) return 'chicken_wings';
     if (d.includes('peri peri') && d.includes('fries')) return 'peri_peri_fries';
     if (d.includes('fries') || d.includes('french fries')) return 'fries';
+    if (d.includes('korean') || d.includes('crispy chicken') || d.includes('chicken crispy')) return 'chicken_65';
     return 'kfc_fried_chicken';
   }
 
-  // === 2. BURGERS, SANDWICHES & FAST FOOD ===
+  // === 1b. COMPREHENSIVE BAKERY, ARTISAN, INDIAN, ASIAN, SWEET, FLAVOURED & INTERNATIONAL BREAD DISHES, BUNS & ROLLS ===
+  // Early Authentic Indian Paratha & Parotta Matching (Prevents non-contiguous stuffed Paratha names from being hijacked by cheese/garlic/pizza/paneer rules)
+  if (
+    (d.includes('paratha') || d.includes('parantha') || d.includes('parotta') || d.includes('porotta') || d.includes('parata') || d.includes('pratha')) &&
+    !d.includes('roll') && !d.includes('wrap') && !d.includes('frankie') && !d.includes('shawarma')
+  ) {
+    if (
+      d.includes('laccha') || d.includes('lachha') || d.includes('lacha') ||
+      d.includes('parotta') || d.includes('porotta') || d.includes('malabar') ||
+      d.includes('kerala') || d.includes('coin') || d.includes('multi layer') || d.includes('layered')
+    ) {
+      return 'laccha_paratha';
+    }
+    if (d.includes('aloo') || d.includes('alu') || d.includes('potato') || d.includes('gobi') || d.includes('gobhi') || d.includes('mooli')) {
+      return 'aloo_paratha';
+    }
+    if (d.includes('paneer')) {
+      return 'paneer_paratha';
+    }
+    return 'paratha';
+  }
+
+  // Protect non-bread dishes that contain the word "bread" or "bun"
+  if (d.includes('bread omelette') || d.includes('bread omelet')) return 'bread_omelette';
+  if (d.includes('bread pakoda') || d.includes('bread pakora') || d.includes('bread bhajiya') || d.includes('bread bhajji')) return 'kanda_bhaji';
+  if (d.includes('bread pattice') || d.includes('bread patties')) return 'ragda_pattice';
+  if (d.includes('bread halwa') || d.includes('double ka meetha') || d.includes('shahi tukda')) return 'gajar_halwa';
+  if (d.includes('bun maska') || d.includes('maska bun')) return 'bun_maska';
+
+  // Japanese & Korean Bread Dishes (Category 8 Intl)
+  if (d.includes('katsu sando') || d.includes('curry bread') || d.includes('yakisoba pan')) {
+    return 'katsu_sando';
+  }
+  if (
+    d.includes('egg sando') || d.includes('tamago sando') || d.includes('fruit sandwich') ||
+    d.includes('egg drop sandwich') || d.includes('korean street toast')
+  ) {
+    return 'tamago_sando';
+  }
+  if (
+    (d.includes('korean') && d.includes('garlic')) ||
+    d.includes('cream cheese garlic bread') || d.includes('garlic cream cheese bread')
+  ) {
+    return 'korean_garlic_bread';
+  }
+
+  // Italian Bruschetta, Crostini, Panzanella & Bread-Based Starters/Appetizers (Categories 1 & 5 Intl)
+  if (
+    d.includes('bruschetta') || d.includes('crostini') || d.includes('panzanella')
+  ) {
+    return 'bruschetta';
+  }
+  if (
+    d.includes('stuffed garlic bread') || d.includes('pull apart bread') ||
+    d.includes('stromboli') || d.includes('calzone') || d.includes('garlic breadstick')
+  ) {
+    return 'stuffed_garlic_bread';
+  }
+  if (
+    d.includes('cheese bread ball') || d.includes('bread cheese stick') ||
+    d.includes('bread croquette') || d.includes('stuffed bread roll') ||
+    d.includes('bread bowl') || d.includes('bread dip') ||
+    d.includes('parmesan bread bite') || d.includes('monkey bread')
+  ) {
+    return 'cheese_bread_balls';
+  }
+  if (d.includes('pizza bread') || d.includes('french bread pizza') || d.includes('pizza toast')) {
+    return 'margherita_pizza';
+  }
+
+  // Category 8: Garlic, Cheese & Flavoured Breads (+ Garlic Baguette, Texas Toast, Grissini)
+  if (
+    d.includes('garlic bread') || d.includes('breadsticks') || d.includes('grissini') ||
+    d.includes('garlic toast') || d.includes('texas toast') || d.includes('garlic baguette') ||
+    (d.includes('bread') && (
+      d.includes('garlic') || d.includes('cheese') || d.includes('chilli') ||
+      d.includes('jalapeno') || d.includes('paneer') || d.includes('corn cheese') ||
+      d.includes('masala') || d.includes('peri peri') || d.includes('onion')
+    ))
+  ) {
+    return 'garlic_bread';
+  }
+  if (
+    d.includes('focaccia') ||
+    (d.includes('bread') && (
+      d.includes('herb') || d.includes('olive') || d.includes('tomato') ||
+      d.includes('spinach') || d.includes('pesto')
+    ))
+  ) {
+    return 'focaccia';
+  }
+
+  // French Croissants, Viennoiserie, French Toast & Sweet Toasts (Categories 2 & 7 Intl)
+  if (
+    d.includes('croissant') || d.includes('pain au chocolat') || d.includes('danish pastry')
+  ) {
+    return 'croissant';
+  }
+  if (
+    d.includes('french toast') || d.includes('pain perdu') || d.includes('brioche toast') ||
+    d.includes('honey toast') || d.includes('nutella toast') || d.includes('raisin bread toast')
+  ) {
+    return 'french_toast';
+  }
+
+  // Mediterranean & Middle Eastern Bread Dishes (Category 4 Intl)
+  if (
+    d.includes('shawarma') || d.includes('kebab wrap') || d.includes('arayes')
+  ) {
+    return 'chicken_shawarma';
+  }
+  if (
+    d.includes('falafel pita') || d.includes('gyro') || d.includes('hummus pita') ||
+    d.includes('pita pocket') || d.includes('fattoush') || d.includes('pita chip')
+  ) {
+    return 'gyro_pita';
+  }
+  if (
+    d.includes('manakish') || d.includes('turkish pide') || /\bpide\b/.test(d) || d.includes('lahmacun')
+  ) {
+    return 'turkish_pide';
+  }
+
+  // Category 7: Asian Breads
+  if (
+    d.includes('shokupan') || d.includes('japanese milk bread') ||
+    d.includes('korean salt bread') || d.includes('melon pan') || d.includes('anpan')
+  ) {
+    return 'shokupan';
+  }
+  if (
+    d.includes('bao bun') || /\bbao\b/.test(d) || d.includes('mantou') ||
+    d.includes('scallion bread') || d.includes('scallion pancake')
+  ) {
+    return 'bao_bun';
+  }
+  if (d.includes('roti canai') || d.includes('roti prata')) {
+    return 'roti_canai';
+  }
+  if (d.includes('barbari') || d.includes('sangak') || d.includes('sheermal') || d.includes('bakarkhani')) {
+    return 'kulcha';
+  }
+  if (
+    d.includes('pita') || d.includes('lavash') || d.includes('yufka') ||
+    d.includes('saj bread') || (d.includes('flatbread') && !d.includes('pizza'))
+  ) {
+    return 'pita_bread';
+  }
+
+  // Categories 4 & 9: Burger, Sandwich & Hot Dog Buns and Small Bakery Rolls
+  if (d.includes('hot dog bun') || d.includes('hot dog roll') || d.includes('hotdog bun') || d.includes('hotdog roll')) {
+    return 'hot_dog_bun';
+  }
+  if (
+    (d.includes('burger') && d.includes('bun')) ||
+    d.includes('slider bun') || d.includes('brioche bun') ||
+    d.includes('sesame bun') || d.includes('potato bun')
+  ) {
+    return 'burger_bun';
+  }
+  if (
+    d.includes('submarine bread') || d.includes('sub bread') || d.includes('sub roll') ||
+    d.includes('hoagie') || d.includes('footlong bread') || d.includes('footlong bun') ||
+    d.includes('sandwich roll') || d.includes('ciabatta roll') || d.includes('panini bread')
+  ) {
+    return 'sub_roll';
+  }
+  if (d.includes('panini')) {
+    return 'panini';
+  }
+  if (d.includes('bagel') || d.includes('english muffin')) {
+    return 'bagel';
+  }
+  if (d.includes('cinnamon roll') || d.includes('cinnamon bun') || d.includes('sticky bun')) {
+    return 'cinnamon_rolls';
+  }
+  if (
+    d.includes('hot cross bun') || d.includes('fruit bun') || d.includes('raisin bun')
+  ) {
+    return 'cinnamon_bread';
+  }
+  if (
+    d.includes('pav bun') || d.includes('ladi pav') || d.includes('bun pav') ||
+    d.includes('milk pav') || d.includes('extra pav') || d.includes('butter pav') ||
+    d.includes('soft pav') || d.includes('plain pav') || d === 'pav'
+  ) {
+    return 'ladi_pav';
+  }
+  if (
+    d.includes('dinner roll') || d.includes('dinner bun') || d.includes('milk bun') ||
+    d.includes('sweet bun') || d.includes('cream bun') || d.includes('coconut bun') ||
+    d.includes('kaiser roll') || d.includes('parker house roll') ||
+    d.includes('cloverleaf roll') || d.includes('pretzel roll') ||
+    d.includes('potato roll') || d.includes('bread roll') || d.includes('soft roll')
+  ) {
+    return 'dinner_roll';
+  }
+
+  // Category 5: Sweet Breads & Dessert Breads
+  if (
+    d.includes('banana bread') || d.includes('pumpkin bread') ||
+    d.includes('apple bread') || d.includes('apple cinnamon bread') ||
+    d.includes('zucchini bread') || d.includes('date bread') || d.includes('bread pudding')
+  ) {
+    return 'banana_bread';
+  }
+  if (d.includes('babka')) {
+    return 'chocolate_babka';
+  }
+  if (d.includes('chocolate bread')) {
+    return 'chocolate_bread';
+  }
+  if (
+    d.includes('cinnamon bread') || d.includes('raisin bread') ||
+    d.includes('fruit bread') || d.includes('panettone') || d.includes('stollen')
+  ) {
+    return 'cinnamon_bread';
+  }
+  if (
+    d.includes('sweet milk bread') || d.includes('brioche sweet bread') ||
+    d.includes('coconut bread') || d.includes('honey bread')
+  ) {
+    return 'shokupan';
+  }
+
+  // Category 3: European & Artisan Breads
+  if (d.includes('baguette') || d.includes('french bread') || d.includes('italian bread')) {
+    return 'baguette';
+  }
+  if (d.includes('sourdough') || d.includes('pain de campagne') || d.includes('spelt bread')) {
+    return 'sourdough_bread';
+  }
+  if (d.includes('brioche')) {
+    return 'burger_bun';
+  }
+  if (
+    d.includes('ciabatta') && !d.includes('sandwich') ||
+    d.includes('pumpernickel') || d.includes('pretzel bread') ||
+    d.includes('challah') || d.includes('turkish bread') || d.includes('artisan bread') ||
+    d.includes('walnut bread') || d.includes('german rye')
+  ) {
+    return 'artisan_bread';
+  }
+
+  // Categories 1 & 6: Regular Bakery, Healthy & Specialty Sliced / Loaf Breads
+  if (
+    d.includes('multigrain') || d.includes('whole grain bread') || d.includes('seed bread') ||
+    d.includes('flaxseed bread') || d.includes('chia seed bread') || d.includes('quinoa bread') ||
+    d.includes('sprouted') || d.includes('oat bread') || d.includes('oatmeal bread') ||
+    d.includes('seeded rye')
+  ) {
+    return 'multigrain_bread';
+  }
+  if (
+    d.includes('brown bread') || d.includes('whole wheat bread') || d.includes('wheat bread') ||
+    d.includes('rye bread') || d.includes('corn bread') || d.includes('millet bread') ||
+    d.includes('ragi bread') || d.includes('gluten free bread') || d.includes('low carb bread') ||
+    d.includes('keto bread') || d.includes('protein bread') || d.includes('high fibre bread') ||
+    d.includes('high fiber bread') || d.includes('buckwheat bread') || d.includes('almond flour bread') ||
+    d.includes('soya bread') || d.includes('barley bread')
+  ) {
+    return 'brown_bread';
+  }
+  if (
+    d.includes('white bread') || d.includes('milk bread') || d.includes('sandwich bread') ||
+    d.includes('soft bread') || d.includes('bakery bread') || d.includes('toast bread') ||
+    d.includes('loaf bread') || d.includes('fresh loaf') || d.includes('homemade bread') ||
+    d.includes('potato bread') || d === 'bread'
+  ) {
+    return 'white_bread';
+  }
+
+  // === 2. BURGERS, SANDWICHES, TOASTS & FAST FOOD ===
   if (d.includes('burger')) {
     if (d.includes('zinger')) return 'zinger_burger';
     if (d.includes('aloo') || d.includes('tikki')) return 'aloo_tikki_burger';
@@ -1471,14 +1860,46 @@ function matchDishToCanonicalKey(dishName: string, restaurantName: string = ''):
     if (d.includes('chicken')) return 'crispy_chicken_burger';
     return 'burger';
   }
-  if (d.includes('sandwich') || d.includes('sandwiches') || (d.includes('toast') && !d.includes('french toast'))) {
+  // International Sandwiches, Subs, Melts, Croques & Toasts
+  if (
+    d.includes('philly cheesesteak') || d.includes('cheesesteak') ||
+    d.includes('sloppy joe') || d.includes('pulled chicken sandwich') ||
+    d.includes('bbq chicken sandwich') || d.includes('tuna melt') ||
+    d.includes('chicken sub') || d.includes('ciabatta sandwich')
+  ) {
+    return 'philly_cheesesteak';
+  }
+  if (
+    d.includes('avocado toast') || d.includes('tartine') ||
+    d.includes('open faced sandwich') || d.includes('open sandwich') ||
+    d.includes('smoked salmon toast')
+  ) {
+    return 'avocado_toast';
+  }
+  if (d.includes('egg mayo sandwich') || d.includes('egg sandwich') || d.includes('egg toast')) {
+    return 'egg_mayo_sandwich';
+  }
+  if (d.includes('croque monsieur') || d.includes('croque madame') || d.includes('monte cristo')) {
+    return 'cheese_sandwich';
+  }
+  if (
+    d.includes('blt sandwich') || d.includes('turkey sandwich') ||
+    d.includes('ham and cheese') || d.includes('reuben sandwich') ||
+    d.includes('tuna sandwich')
+  ) {
+    return 'club_sandwich';
+  }
+  if (
+    (d.includes('sandwich') || d.includes('sandwiches') || (d.includes('toast') && !d.includes('french toast'))) &&
+    !d.includes('bhurji') && !d.includes('egg') && !d.includes('anda')
+  ) {
     if (d.includes('club')) return 'club_sandwich';
     if (d.includes('chicken')) return 'chicken_sandwich';
-    if (d.includes('cheese') || d.includes('grilled cheese')) return 'cheese_sandwich';
+    if (d.includes('cheese') || d.includes('grilled cheese') || d.includes('mushroom') || d.includes('spinach')) return 'cheese_sandwich';
     if (d.includes('bun maska')) return 'bun_maska';
     return 'sandwich';
   }
-  if (d.includes('wrap') || d.includes('roll') || d.includes('frankie')) {
+  if ((d.includes('wrap') || d.includes('roll') || d.includes('frankie')) && !d.includes('spring roll')) {
     if (d.includes('chicken')) return 'chicken_wrap';
     if (d.includes('paneer')) return 'paneer_wrap';
     return 'kathi_roll';
@@ -1493,7 +1914,7 @@ function matchDishToCanonicalKey(dishName: string, restaurantName: string = ''):
   if (d.includes('nugget') || d.includes('nuggets')) return 'chicken_popcorn';
   if (d.includes('wings') || d.includes('chicken wings')) return 'chicken_wings';
   if (d.includes('nachos')) return 'nachos';
-  if (d.includes('garlic bread') || d.includes('breadsticks') || d.includes('bruschetta')) return 'garlic_bread';
+  if (d.includes('garlic bread') || d.includes('breadsticks') || (d.includes('bruschetta') && !d.includes('chicken'))) return 'garlic_bread';
 
   // === 3. PIZZA, WOOD-FIRED & ITALIAN ===
   if (
@@ -1502,10 +1923,9 @@ function matchDishToCanonicalKey(dishName: string, restaurantName: string = ''):
     d.includes('margherita') ||
     d.includes('margarita') ||
     d.includes('pepperoni') ||
-    d.includes('flatbread') ||
-    r.includes('pizza') ||
-    r.includes('pizzeria') ||
-    r.includes('italian')
+    ((r.includes('pizza') || r.includes('pizzeria') || r.includes('italian')) &&
+      !d.includes('pasta') && !d.includes('penne') && !d.includes('spaghetti') &&
+      !d.includes('lasagna') && !d.includes('lasagne') && !d.includes('paratha') && !d.includes('juice'))
   ) {
     if (d.includes('margherita') || d.includes('margarita') || d.includes('basil')) return 'margherita_pizza';
     if (d.includes('pepperoni')) return 'pepperoni_pizza';
@@ -1642,18 +2062,181 @@ function matchDishToCanonicalKey(dishName: string, restaurantName: string = ''):
   if (d.includes('garlic naan') || d.includes('lasuni naan') || (d.includes('naan') && d.includes('garlic'))) return 'garlic_naan';
   if (d.includes('butter naan')) return 'butter_naan';
   if (d.includes('naan')) return 'butter_naan';
+  if (d.includes('bhakri') || d.includes('rotla') || d.includes('bajra roti') || d.includes('makki ki roti') || d.includes('jowar')) return 'bhakri';
   if (d.includes('tandoori roti') || d.includes('tandoor roti')) return 'tandoori_roti';
   if (d.includes('butter roti')) return 'butter_roti';
-  if (d.includes('roti') || d.includes('chapati') || d.includes('phulka')) return 'roti';
-  if (d.includes('bhakri') || d.includes('rotla')) return 'bhakri';
-  if (d.includes('paneer paratha')) return 'paneer_paratha';
-  if (d.includes('gobi paratha') || d.includes('gobhi paratha')) return 'gobi_paratha';
-  if (d.includes('laccha paratha') || d.includes('lachha paratha')) return 'laccha_paratha';
-  if (d.includes('paratha') || d.includes('parantha') || d.includes('aloo paratha') || d.includes('thepla')) return 'paratha';
+  if (d.includes('chapati') || d.includes('phulka')) return 'chapati';
+  if (d.includes('roti')) return 'roti';
+  if (d.includes('laccha') || d.includes('lachha') || d.includes('lacha')) return 'laccha_paratha';
+  if (d.includes('aloo') && (d.includes('paratha') || d.includes('parantha'))) return 'aloo_paratha';
+  if (d.includes('paneer') && (d.includes('paratha') || d.includes('parantha'))) return 'paneer_paratha';
+  if (d.includes('gobi') && (d.includes('paratha') || d.includes('parantha'))) return 'gobi_paratha';
+  if (d.includes('paratha') || d.includes('parantha') || d.includes('thepla')) return 'paratha';
   if (d.includes('kulcha')) return 'kulcha';
-  if (d.includes('puri bhaji') || d.includes('poori bhaji')) return 'puri_bhaji';
+  if (d.includes('puri bhaji') || d.includes('poori bhaji') || /\bpuri\b/.test(d) || /\bpoori\b/.test(d)) return 'puri_bhaji';
   if (d.includes('bhature') || d.includes('bhatura') || (d.includes('chole') && !d.includes('rice')) || d.includes('chhole')) return 'chole_bhature';
   if (d.includes('puran poli') || d.includes('puranpoli')) return 'puran_poli';
+
+  // === 7b. COMPREHENSIVE NON-VEG STARTERS (CHICKEN, MUTTON, FISH, PRAWNS, SEAFOOD, MAHARASHTRIAN, CHINESE, TANDOORI, EGG & INTERNATIONAL) ===
+  // 1. Egg Starters (Category 8)
+  if (
+    d.includes('boiled egg fry') || d.includes('egg pakoda') || d.includes('egg pakora') ||
+    d.includes('egg 65') || d.includes('egg chilli') || d.includes('chilli egg') ||
+    d.includes('egg manchurian') || d.includes('devilled egg') || d.includes('deviled egg') ||
+    d.includes('egg cutlet') || d.includes('scotch egg') || d.includes('egg bhurji toast') ||
+    d.includes('omelette bite') || d.includes('omelet bite') || d.includes('crispy egg')
+  ) {
+    return 'egg_starter';
+  }
+
+  // 2. Prawns, Crab, Squid, Calamari & Tisrya Seafood Starters (Categories 4, 5, 6, 7)
+  if (d.includes('tisrya') || d.includes('tisreo') || d.includes('clams')) {
+    return 'tisrya_masala';
+  }
+  if (
+    (d.includes('prawn') || d.includes('kolambi')) &&
+    (d.includes('tandoori') || d.includes('tandoor') || d.includes('tikka'))
+  ) {
+    return 'tandoori_prawns';
+  }
+  if (
+    (d.includes('prawn') || d.includes('kolambi')) &&
+    (d.includes('chilli') || d.includes('garlic') || d.includes('manchurian') || d.includes('schezwan'))
+  ) {
+    return 'chilli_garlic_prawns';
+  }
+  if (
+    ((d.includes('prawn') || d.includes('kolambi')) && (
+      d.includes('koliwada') || d.includes('fry') || d.includes('crispy') ||
+      d.includes('65') || d.includes('pakoda') || d.includes('pakora') ||
+      d.includes('tempura') || d.includes('salt and pepper') || d.includes('golden') ||
+      d.includes('sukka') || d.includes('sukha') || d.includes('pepper')
+    )) ||
+    d.includes('crab lollipop') || d.includes('crab fry') || d.includes('crab cake') ||
+    d.includes('squid') || d.includes('calamari')
+  ) {
+    return 'prawns_koliwada';
+  }
+
+  // 3. Fish Starters (Categories 3, 5, 6, 7, 9)
+  if (d.includes('bombil')) {
+    return 'bombil_fry';
+  }
+  if (
+    d.includes('fish finger') || d.includes('fish cutlet') ||
+    d.includes('fish and chips') || d.includes('fish chips')
+  ) {
+    return 'fish_fingers';
+  }
+  if (
+    (d.includes('fish') || d.includes('surmai') || d.includes('pomfret')) &&
+    (d.includes('tikka') || d.includes('tandoori') || d.includes('tandoor'))
+  ) {
+    return 'fish_tikka';
+  }
+  if (
+    d.includes('amritsari fish') || d.includes('fish koliwada') ||
+    d.includes('fish pakoda') || d.includes('fish pakora') ||
+    d.includes('fish 65') || d.includes('crispy fish') ||
+    d.includes('fish manchurian') || d.includes('chilli fish') || d.includes('fish chilli')
+  ) {
+    return 'amritsari_fish';
+  }
+  if (
+    (d.includes('fish') || d.includes('surmai') || d.includes('pomfret') || d.includes('bangda')) &&
+    (d.includes('fry') || d.includes('rava') || d.includes('tawa') || d.includes('pepper'))
+  ) {
+    return 'fish_fry';
+  }
+
+  // 4. Mutton Starters & Kebabs (Categories 2, 5, 7)
+  if (d.includes('mutton galouti') || d.includes('galouti kebab') || d.includes('galouti kabab')) {
+    return 'mutton_galouti_kebab';
+  }
+  if (
+    d.includes('mutton shami') || d.includes('shami kebab') ||
+    d.includes('mutton chapli') || d.includes('chapli kebab') ||
+    d.includes('mutton cutlet') || d.includes('kheema ball') || d.includes('keema ball')
+  ) {
+    return 'mutton_shami_kebab';
+  }
+  if (
+    d.includes('mutton seekh') || d.includes('mutton gilafi') || d.includes('gilafi kebab') ||
+    d.includes('mutton boti') || d.includes('mutton tikka') || d.includes('mutton kebab') ||
+    d.includes('mutton chops') || d.includes('mutton raan')
+  ) {
+    return 'mutton_seekh_kebab';
+  }
+  if (
+    (d.includes('mutton') || d.includes('kheema') || d.includes('keema') || d.includes('kaleji')) &&
+    (d.includes('fry') || d.includes('sukka') || d.includes('sukha') || d.includes('pepper') || d.includes('dry'))
+  ) {
+    return 'sukha_mutton_bhakri';
+  }
+
+  // 5. Chicken Starters, Kebabs, Maharashtrian Dry Chicken, Chinese & International Chicken Starters (Categories 1, 5, 6, 7, 9)
+  if (
+    d.includes('chicken malai') || d.includes('malai tikka') || d.includes('malai kebab') ||
+    d.includes('chicken afghani') || d.includes('afghani kebab') ||
+    d.includes('reshmi kebab') || d.includes('chicken reshmi') ||
+    d.includes('cheese kebab') || d.includes('kasturi kebab')
+  ) {
+    return 'chicken_malai_tikka';
+  }
+  if (
+    d.includes('chicken lollipop') || d.includes('lollipop') || d.includes('chicken drumstick')
+  ) {
+    return 'chicken_lollipop';
+  }
+  if (
+    d.includes('chicken sukka') || d.includes('chicken sukha') || d.includes('sukka chicken') ||
+    (d.includes('chicken') && d.includes('dry') && (d.includes('kolhapuri') || d.includes('tambda') || d.includes('rassa'))) ||
+    d.includes('chicken lasuni fry') || d.includes('chicken khandeshi fry') ||
+    d.includes('chicken gavran fry') || d.includes('chicken vade')
+  ) {
+    return 'chicken_sukka';
+  }
+  if (
+    d.includes('chicken 65') || d.includes('chicken pakoda') || d.includes('chicken pakora') ||
+    d.includes('chicken crispy') || d.includes('crispy chicken') ||
+    d.includes('chicken salt and pepper') || d.includes('chicken fry') ||
+    d.includes('chicken pahadi fry') || d.includes('chicken dynamite') ||
+    d.includes('korean fried chicken')
+  ) {
+    return 'chicken_65';
+  }
+  if (
+    d.includes('chicken wonton') || d.includes('fried wonton') ||
+    d.includes('chicken dim sum') || d.includes('chicken dimsum') ||
+    d.includes('chicken sui mai') || d.includes('sui mai')
+  ) {
+    return 'chicken_momos';
+  }
+  if (
+    d.includes('chicken schezwan') || d.includes('chicken hakka') ||
+    d.includes('chicken hot garlic') || d.includes('chilli chicken') ||
+    d.includes('chicken manchurian') || d.includes('dragon chicken')
+  ) {
+    return 'chilli_chicken';
+  }
+  if (
+    d.includes('chicken quesadilla') || d.includes('chicken taquito') ||
+    d.includes('chicken croquette') || d.includes('chicken empanada') ||
+    d.includes('chicken bruschetta') || d.includes('chicken popcorn') ||
+    d.includes('chicken nugget')
+  ) {
+    return 'chicken_popcorn';
+  }
+  if (
+    d.includes('chicken tikka') || d.includes('hariyali tikka') || d.includes('pahadi tikka') ||
+    d.includes('achari tikka') || d.includes('angara tikka') || d.includes('angara kebab') ||
+    d.includes('banjara kebab') || d.includes('peshawari kebab') ||
+    d.includes('chicken satay') || d.includes('peri peri chicken') ||
+    d.includes('chicken yakitori') || d.includes('teriyaki skewer') || d.includes('chicken skewer') ||
+    d.includes('chicken shami') || d.includes('chicken galouti') || d.includes('chicken seekh')
+  ) {
+    return 'chicken_tikka';
+  }
 
   // === 8. INDIAN MAIN COURSE CURRIES ===
   // 8a. Vegetarian Curries
@@ -2063,9 +2646,8 @@ async function getRawFoodImageBuffer(
   dishName?: string,
   restaurantName?: string
 ): Promise<Buffer | null> {
-  // 1. If explicit verified URL provided (local asset or remote Swiggy/Cloudinary/Zomato)
+  // 1a. If explicitUrl points to a local photographic asset in public/images/food/, serve it immediately
   if (explicitUrl) {
-    // 1a. Check if explicitUrl points to a local photographic asset in public/images/food/
     const localMatch = explicitUrl.match(/(?:\/bhookasur_ka_food_tour)?\/images\/food\/([^?#]+)/);
     if (localMatch) {
       const filename = localMatch[1];
@@ -2078,33 +2660,10 @@ async function getRawFoodImageBuffer(
         }
       }
     }
-
-    // 1b. If remote URL, fetch with browser headers and referer for Swiggy/Zomato CDNs
-    if (explicitUrl.startsWith('http://') || explicitUrl.startsWith('https://')) {
-      try {
-        const headers: Record<string, string> = {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-          'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
-        };
-        if (explicitUrl.includes('swiggy.com')) {
-          headers['Referer'] = 'https://www.swiggy.com/';
-        } else if (explicitUrl.includes('zmtcdn.com') || explicitUrl.includes('zomato.com')) {
-          headers['Referer'] = 'https://www.zomato.com/';
-        }
-        const res = await fetch(explicitUrl, {
-          headers,
-          signal: AbortSignal.timeout(6000)
-        });
-        if (res.ok) {
-          return Buffer.from(await res.arrayBuffer());
-        }
-      } catch (e) {
-        console.warn('Explicit food photo fetch failed, falling back to canonical:', e);
-      }
-    }
   }
 
   // 2. Local authentic photographic asset in public/images/food/ (check webp then jpg)
+  // Always prioritize our verified canonical local food assets over generic remote URLs
   const localFileName = CANONICAL_LOCAL_ASSETS[canonicalKey];
   if (localFileName) {
     try {
@@ -2118,6 +2677,34 @@ async function getRawFoodImageBuffer(
       }
     } catch (fsErr) {
       console.warn('Local food asset read failed, falling back to online AI generator:', fsErr);
+    }
+  }
+
+  // 2b. If remote verified URL provided (Swiggy/Zomato/Cloudinary, ignoring generic Unsplash placeholders)
+  if (
+    explicitUrl &&
+    (explicitUrl.startsWith('http://') || explicitUrl.startsWith('https://')) &&
+    !explicitUrl.includes('unsplash.com')
+  ) {
+    try {
+      const headers: Record<string, string> = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+      };
+      if (explicitUrl.includes('swiggy.com')) {
+        headers['Referer'] = 'https://www.swiggy.com/';
+      } else if (explicitUrl.includes('zmtcdn.com') || explicitUrl.includes('zomato.com')) {
+        headers['Referer'] = 'https://www.zomato.com/';
+      }
+      const res = await fetch(explicitUrl, {
+        headers,
+        signal: AbortSignal.timeout(6000)
+      });
+      if (res.ok) {
+        return Buffer.from(await res.arrayBuffer());
+      }
+    } catch (e) {
+      console.warn('Explicit food photo fetch failed, falling back to canonical:', e);
     }
   }
 
@@ -2169,7 +2756,13 @@ async function getRawFoodImageBuffer(
       fallbackBase = 'dhokla';
     } else if (k.includes('bhakarwadi') || k.includes('gathiya') || k.includes('fafda') || k.includes('chakli')) {
       fallbackBase = 'bhakarwadi';
-    } else if (k.includes('cooler') || k.includes('mojito') || k.includes('solkadhi') || k.includes('taak') || k.includes('chaas') || k.includes('juice') || k.includes('drink')) {
+    } else if (k.includes('sugarcane')) {
+      fallbackBase = 'sugarcane_juice';
+    } else if (k.includes('lemonade') || k.includes('mojito') || k.includes('cooler')) {
+      fallbackBase = 'lemonade';
+    } else if (k.includes('juice') || k.includes('drink') || k.includes('sharbat')) {
+      fallbackBase = 'fruit_juice';
+    } else if (k.includes('solkadhi') || k.includes('taak') || k.includes('chaas')) {
       fallbackBase = 'solkadhi';
     } else if (k.includes('tea') || k.includes('chai')) {
       fallbackBase = 'chai';
@@ -2193,7 +2786,9 @@ async function getRawFoodImageBuffer(
       fallbackBase = 'fried_rice';
     } else if (k.includes('momo') || k.includes('dimsum')) {
       fallbackBase = 'momos';
-    } else if (k.includes('roti') || k.includes('naan') || k.includes('paratha') || k.includes('kulcha') || k.includes('bhakri') || k.includes('chapati') || k.includes('phulka')) {
+    } else if (k.includes('paratha') || k.includes('parantha') || k.includes('parotta')) {
+      fallbackBase = 'paratha';
+    } else if (k.includes('roti') || k.includes('naan') || k.includes('kulcha') || k.includes('bhakri') || k.includes('chapati') || k.includes('phulka')) {
       fallbackBase = 'butter_naan';
     } else if (k.includes('kaju')) {
       fallbackBase = 'kaju_masala';
