@@ -586,7 +586,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
                 {/* Submit Button */}
                 <div className="pt-1">
                   <button
-                    id="btn-frame11-submit-registration"
+                    id="btn-frame11-modal-submit"
                     type="submit"
                     disabled={isRegistering || isCheckingMobile || !isValidIndianMobile(mobile) || name.trim().length < 2 || !consent || registeredInfo?.isRegistered}
                     className={`w-full py-3 px-4 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
@@ -596,12 +596,12 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
                     }`}
                   >
                     {isRegistering ? (
-                      <span className="animate-pulse">Registering...</span>
+                      <span className="animate-pulse">Submitting...</span>
                     ) : registeredInfo?.isRegistered ? (
                       <span>NUMBER PEHLE SE REGISTERED HAI ⚠️</span>
                     ) : (
                       <>
-                        <span>TOUR PASS CLAIM KARO</span>
+                        <span>SUBMIT</span>
                         <ArrowRight className="w-4 h-4 stroke-[2.5]" />
                       </>
                     )}

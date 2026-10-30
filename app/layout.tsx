@@ -104,6 +104,27 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             `,
           }}
         />
+              {/* Fail-Safe Button Tracking Helper for GTM & GA4 */}
+        <Script
+          id="gtm-button-click-helper"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              document.addEventListener('click', function(e) {
+                var target = e.target;
+                var btn = target && target.closest ? target.closest('button[id^="btn-"], a[id^="btn-"]') : null;
+                if (btn && btn.id) {
+                  window.dataLayer = window.dataLayer || [];
+                  window.dataLayer.push({
+                    event: 'bhookasur_button_click',
+                    button_id: btn.id,
+                    button_text: (btn.innerText || btn.getAttribute('aria-label') || '').trim()
+                  });
+                }
+              }, true);
+            `,
+          }}
+        />
       </head>
       <body className="min-h-screen bg-black text-white antialiased">
         {/* Google Tag Manager (noscript) */}

@@ -50,6 +50,11 @@ button {
   font-family: inherit;
 }
 
+/* Ensure GTM Click ID captures the <button id="..."> instead of inner <span> or <svg> */
+button * {
+  pointer-events: none;
+}
+
 input {
   font-family: inherit;
 }
