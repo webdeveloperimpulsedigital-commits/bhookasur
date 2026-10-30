@@ -6,6 +6,22 @@ import { InteractiveTourMap } from './InteractiveTourMap';
 import { BakasurShareCardModal } from '../BakasurShareCardModal';
 import { getOrCreateUserId, getUserSessionsHistory, getStoredUserMobile } from '@/lib/tracker';
 
+function isValidIndianMobile(raw: string): boolean {
+  const clean = (raw || '').replace(/\D/g, '');
+  if (!/^[6-9]\d{9}$/.test(clean)) return false;
+  if (/(\d)\1{5,}/.test(clean)) return false;
+  if (/^(\d\d)\1{4}$/.test(clean)) return false;
+  if (new Set(clean.split('')).size < 3) return false;
+  const sequences = [
+    '012345', '123456', '234567', '345678', '456789', '567890', '678901',
+    '987654', '876543', '765432', '654321', '543210', '432109'
+  ];
+  for (const seq of sequences) {
+    if (clean.includes(seq)) return false;
+  }
+  return true;
+}
+
 interface Frame11LiveMapProps {
   sessionId?: string;
   isRegistered?: boolean;
@@ -79,16 +95,37 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
 
   const hasRegistered = Boolean(isRegistered || registeredMobile || participationId || isSubmittedSuccess || registeredInfo?.isRegistered);
 
-  // Debounced check whenever 10 digits are typed
+  // Debounced check whenever digits are typed
   React.useEffect(() => {
     const clean = mobile.replace(/\D/g, '');
+    if (!clean) {
+      setRegisteredInfo(null);
+      setLocalError('');
+      return;
+    }
+
+    // Immediate check if first digit is not 6-9 (e.g. 1234567890)
+    if (!/^[6-9]/.test(clean)) {
+      setRegisteredInfo(null);
+      setLocalError('Please enter a valid mobile number');
+      return;
+    }
+
     if (clean.length !== 10) {
       setRegisteredInfo(null);
+      setLocalError('');
+      return;
+    }
+
+    if (!isValidIndianMobile(clean)) {
+      setRegisteredInfo(null);
+      setLocalError('Please enter a valid mobile number');
       return;
     }
 
     let isMounted = true;
     setIsCheckingMobile(true);
+    setLocalError('');
     const timer = setTimeout(async () => {
       try {
         const res = await fetch(`/api/campaign/participate?check_mobile=${clean}`);
@@ -163,8 +200,8 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
     }
 
     const cleanMobile = mobile.replace(/\D/g, '');
-    if (!cleanMobile || cleanMobile.length !== 10) {
-      setLocalError('Kripya apna sahi 10-digit mobile number daalein (sirf 10 numbers).');
+    if (!cleanMobile || cleanMobile.length !== 10 || !isValidIndianMobile(cleanMobile)) {
+      setLocalError('Please enter a valid mobile number');
       return;
     }
 
@@ -551,7 +588,7 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
                   <button
                     id="btn-frame11-submit-registration"
                     type="submit"
-                    disabled={isRegistering || isCheckingMobile || mobile.length !== 10 || name.trim().length < 2 || !consent || registeredInfo?.isRegistered}
+                    disabled={isRegistering || isCheckingMobile || !isValidIndianMobile(mobile) || name.trim().length < 2 || !consent || registeredInfo?.isRegistered}
                     className={`w-full py-3 px-4 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
                       registeredInfo?.isRegistered
                         ? 'bg-slate-200 text-slate-500 cursor-not-allowed border border-slate-300'

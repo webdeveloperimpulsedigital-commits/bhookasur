@@ -4,6 +4,22 @@ import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, User, ShieldCheck } from 'lucide-react';
 import { FrameFooter } from './FrameFooter';
 
+function isValidIndianMobile(raw: string): boolean {
+  const clean = (raw || '').replace(/\D/g, '');
+  if (!/^[6-9]\d{9}$/.test(clean)) return false;
+  if (/(\d)\1{5,}/.test(clean)) return false;
+  if (/^(\d\d)\1{4}$/.test(clean)) return false;
+  if (new Set(clean.split('')).size < 3) return false;
+  const sequences = [
+    '012345', '123456', '234567', '345678', '456789', '567890', '678901',
+    '987654', '876543', '765432', '654321', '543210', '432109'
+  ];
+  for (const seq of sequences) {
+    if (clean.includes(seq)) return false;
+  }
+  return true;
+}
+
 interface Frame12RegistrationProps {
   onSubmitNumber: (mobile: string, name?: string) => Promise<void>;
   onBack: () => void;
@@ -33,13 +49,30 @@ export const Frame12Registration: React.FC<Frame12RegistrationProps> = ({
 
   React.useEffect(() => {
     const clean = mobile.replace(/\D/g, '');
+    if (!clean) {
+      setRegisteredInfo(null);
+      setLocalError('');
+      return;
+    }
+    if (!/^[6-9]/.test(clean)) {
+      setRegisteredInfo(null);
+      setLocalError('Please enter a valid mobile number');
+      return;
+    }
     if (clean.length !== 10) {
       setRegisteredInfo(null);
+      setLocalError('');
+      return;
+    }
+    if (!isValidIndianMobile(clean)) {
+      setRegisteredInfo(null);
+      setLocalError('Please enter a valid mobile number');
       return;
     }
 
     let isMounted = true;
     setIsChecking(true);
+    setLocalError('');
     const timer = setTimeout(async () => {
       try {
         const res = await fetch(`/api/campaign/participate?check_mobile=${clean}`);
@@ -85,8 +118,8 @@ export const Frame12Registration: React.FC<Frame12RegistrationProps> = ({
     }
 
     const clean = mobile.replace(/\D/g, '');
-    if (!clean || clean.length !== 10) {
-      setLocalError('Kripya apna sahi 10-digit mobile number daalein (sirf 10 numbers).');
+    if (!clean || clean.length !== 10 || !isValidIndianMobile(clean)) {
+      setLocalError('Please enter a valid mobile number');
       return;
     }
 

@@ -4,6 +4,22 @@ import type { RowDataPacket } from 'mysql2';
 
 export const dynamic = 'force-dynamic';
 
+function isValidIndianMobile(raw: string): boolean {
+  const clean = (raw || '').replace(/\D/g, '');
+  if (!/^[6-9]\d{9}$/.test(clean)) return false;
+  if (/(\d)\1{5,}/.test(clean)) return false;
+  if (/^(\d\d)\1{4}$/.test(clean)) return false;
+  if (new Set(clean.split('')).size < 3) return false;
+  const sequences = [
+    '012345', '123456', '234567', '345678', '456789', '567890', '678901',
+    '987654', '876543', '765432', '654321', '543210', '432109'
+  ];
+  for (const seq of sequences) {
+    if (clean.includes(seq)) return false;
+  }
+  return true;
+}
+
 // GET: Check if a mobile number is already registered
 export async function GET(request: Request) {
   try {
@@ -14,8 +30,8 @@ export async function GET(request: Request) {
     }
     const cleanMobile = mobile.replace(/\D/g, '');
     const tenDigit = cleanMobile.length >= 10 ? cleanMobile.slice(-10) : cleanMobile;
-    if (tenDigit.length !== 10) {
-      return NextResponse.json({ success: false, error: 'Please enter a valid 10-digit number' }, { status: 400 });
+    if (tenDigit.length !== 10 || !isValidIndianMobile(tenDigit)) {
+      return NextResponse.json({ success: false, error: 'Please enter a valid mobile number' }, { status: 400 });
     }
 
     const existing = await db.getParticipantByMobile(tenDigit);
@@ -45,8 +61,8 @@ export async function POST(request: Request) {
 
     const rawMobile = String(mobile || '').trim();
     const cleanMobile = rawMobile.replace(/\D/g, '');
-    if (!cleanMobile || cleanMobile.length !== 10 || !/^\d{10}$/.test(rawMobile)) {
-      return NextResponse.json({ success: false, error: 'Kripya apna sahi 10-digit mobile number daalein (sirf numbers allow hain).' }, { status: 400 });
+    if (!cleanMobile || cleanMobile.length !== 10 || !/^[6-9]\d{9}$/.test(cleanMobile) || !isValidIndianMobile(cleanMobile)) {
+      return NextResponse.json({ success: false, error: 'Please enter a valid mobile number' }, { status: 400 });
     }
     const tenDigit = cleanMobile;
 
