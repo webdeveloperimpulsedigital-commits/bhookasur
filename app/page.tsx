@@ -1057,7 +1057,7 @@ export default function CampaignPage() {
                         : (currentFrame as number) === 8
                           ? "/images/final-frames/Acidity-and-Dakare.mp4"
                           : currentFrame === 9
-                            ? "/images/final-frames/Drinking-Gastrium-new.mp4"
+                            ? "/images/final-frames/Drinking-Gastrium-final.mp4"
                             : currentFrame === 10
                               ? "/images/final-frames/Bhookasur-Showing-Heart.mp4"
                               : currentFrame === 12
@@ -1266,7 +1266,7 @@ export default function CampaignPage() {
           </>
         )}
         {(currentFrame === 7 || currentFrame === 8) && (
-          <video src="/images/final-frames/Drinking-Gastrium-new.mp4" preload="auto" muted />
+          <video src="/images/final-frames/Drinking-Gastrium-final.mp4" preload="auto" muted />
         )}
       </div>
     </div>
