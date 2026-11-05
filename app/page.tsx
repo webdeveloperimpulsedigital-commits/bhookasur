@@ -855,6 +855,9 @@ export default function CampaignPage() {
     if (frame === 3) {
       return 'h-[65%] xs:h-[67%] sm:h-[60%] lg:h-full';
     }
+    if (frame === 9) {
+      return 'h-[74%] xs:h-[76%] sm:h-[70%] lg:h-full';
+    }
     if (frame === 10) {
       return 'h-[54%] xs:h-[56%] sm:h-[52%] lg:h-full';
     }
@@ -1054,7 +1057,7 @@ export default function CampaignPage() {
                         : (currentFrame as number) === 8
                           ? "/images/final-frames/Acidity-and-Dakare.mp4"
                           : currentFrame === 9
-                            ? "/images/final-frames/Bhookasur-Drinking-Gastrium.mp4"
+                            ? "/images/final-frames/Drinking-Gastrium-new.mp4"
                             : currentFrame === 10
                               ? "/images/final-frames/Bhookasur-Showing-Heart.mp4"
                               : currentFrame === 12
@@ -1077,6 +1080,7 @@ export default function CampaignPage() {
               restaurantName={selectedRestaurant?.name}
               soundEnabled={false}
               onBack={currentFrame > 1 ? handleGoPreviousFrame : undefined}
+              onVideoEnded={currentFrame === 9 ? handleGastriumComplete : undefined}
             />
           </div>
 
@@ -1262,7 +1266,7 @@ export default function CampaignPage() {
           </>
         )}
         {(currentFrame === 7 || currentFrame === 8) && (
-          <video src="/images/final-frames/Bhookasur-Drinking-Gastrium.mp4" preload="auto" muted />
+          <video src="/images/final-frames/Drinking-Gastrium-new.mp4" preload="auto" muted />
         )}
       </div>
     </div>

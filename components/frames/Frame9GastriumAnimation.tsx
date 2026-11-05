@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { withBasePath } from '@/lib/basePath';
 
 interface Frame9GastriumAnimationProps {
@@ -12,6 +12,25 @@ export const Frame9GastriumAnimation: React.FC<Frame9GastriumAnimationProps> = (
   const [mounted, setMounted] = useState<boolean>(false);
   const [gastriumImgError, setGastriumImgError] = useState<boolean>(false);
   const [acidityImgError, setAcidityImgError] = useState<boolean>(false);
+  const [completed, setCompleted] = useState<boolean>(false);
+
+  const handleComplete = useCallback(() => {
+    if (completed) return;
+    setCompleted(true);
+    onAnimationComplete();
+  }, [completed, onAnimationComplete]);
+
+  // Listen for video reaching the "feel good" end
+  useEffect(() => {
+    const handleVideoEnded = () => {
+      handleComplete();
+    };
+
+    window.addEventListener('gastrium-video-ended', handleVideoEnded);
+    return () => {
+      window.removeEventListener('gastrium-video-ended', handleVideoEnded);
+    };
+  }, [handleComplete]);
 
   // Preload both logo images immediately on mount with proper basePath
   useEffect(() => {
@@ -46,11 +65,11 @@ export const Frame9GastriumAnimation: React.FC<Frame9GastriumAnimationProps> = (
     if (!showTagline) return;
 
     const timer = setTimeout(() => {
-      onAnimationComplete();
-    }, 7500);
+      handleComplete();
+    }, 5800);
 
     return () => clearTimeout(timer);
-  }, [showTagline, onAnimationComplete]);
+  }, [showTagline, handleComplete]);
 
   // Robust path fallbacks in case user places logos in /images/final-frames/ or alternate locations
   const handleGastriumError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -69,8 +88,8 @@ export const Frame9GastriumAnimation: React.FC<Frame9GastriumAnimationProps> = (
 
   return (
     <div
-      onClick={onAnimationComplete}
-      className="relative w-full h-full min-h-[170px] xs:min-h-[200px] flex items-center justify-center text-center px-4 sm:px-8 md:px-10 bg-white cursor-pointer select-none overflow-hidden"
+      onClick={handleComplete}
+      className="relative w-full h-full min-h-0 flex items-center justify-center text-center px-4 sm:px-8 md:px-10 bg-white cursor-pointer select-none overflow-hidden"
     >
       {/* Soothing ambient glow transition behind logos */}
       <div

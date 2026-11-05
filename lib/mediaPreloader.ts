@@ -44,11 +44,11 @@ export const FRAME_MEDIA_DEPENDENCIES: Record<number, string[]> = {
     '/images/all-frames/Showing Love.mp4'
   ],
   7: [
-    '/images/final-frames/Bhookasur-Drinking-Gastrium.mp4',
+    '/images/final-frames/Drinking-Gastrium-new.mp4',
     '/images/final-frames/Bhookasur-Showing-Heart.mp4'
   ],
   8: [
-    '/images/final-frames/Bhookasur-Drinking-Gastrium.mp4',
+    '/images/final-frames/Drinking-Gastrium-new.mp4',
     '/images/final-frames/Bhookasur-Showing-Heart.mp4'
   ],
   9: [

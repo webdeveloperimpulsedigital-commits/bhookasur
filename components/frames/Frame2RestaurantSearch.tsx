@@ -391,7 +391,7 @@ export const Frame2RestaurantSearch: React.FC<Frame2RestaurantSearchProps> = ({
             </>
           ) : (
             <>
-              Apna favourite<br />food stop batavo.
+              Apna favourite<br />food stop batao.
             </>
           )}
         </h2>

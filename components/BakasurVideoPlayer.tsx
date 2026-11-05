@@ -511,7 +511,7 @@ export const BakasurVideoPlayer: React.FC<BakasurVideoPlayerProps> = ({
     else if (frameNumber === 3 || frameNumber === 4) src = '/images/final-frames/3.mp4';
     else if (frameNumber === 6) src = '/images/all-frames/Showing Love.mp4';
     else if (frameNumber === 7 || frameNumber === 8 || isHeartburn) src = '/images/final-frames/Acidity-and-Dakare.mp4';
-    else if (frameNumber === 9) src = '/images/final-frames/Bhookasur-Drinking-Gastrium.mp4';
+    else if (frameNumber === 9) src = '/images/final-frames/Drinking-Gastrium-new.mp4';
     else if (frameNumber === 10) src = '/images/final-frames/Bhookasur-Showing-Heart.mp4';
     else if (frameNumber === 11) src = '/images/all-frames/Showing Love.mp4';
     else if (frameNumber === 12) src = '/images/all-frames/Showing Love.mp4';
@@ -614,7 +614,7 @@ export const BakasurVideoPlayer: React.FC<BakasurVideoPlayerProps> = ({
           poster={withBasePath(activePosterSrc)}
           playsInline
           autoPlay
-          loop
+          loop={frameNumber === 9 ? false : loop}
           muted={!soundEnabled}
           preload="auto"
           onLoadedData={() => {
@@ -634,15 +634,26 @@ export const BakasurVideoPlayer: React.FC<BakasurVideoPlayerProps> = ({
               videoRef.current.play().catch(() => {});
             }
           }}
+          onEnded={() => {
+            if (onVideoEnded) {
+              onVideoEnded();
+            }
+            if (frameNumber === 9) {
+              window.dispatchEvent(new CustomEvent('gastrium-video-ended'));
+            }
+          }}
           onTimeUpdate={(e) => {
             if (frameNumber === 9) {
               const video = e.currentTarget;
               if (video.currentTime >= 3.8) {
                 window.dispatchEvent(new CustomEvent('gastrium-stomach-revealed'));
               }
+              if (video.currentTime >= 9.8) {
+                window.dispatchEvent(new CustomEvent('gastrium-video-ended'));
+              }
             }
           }}
-          className="w-full h-full object-cover object-top relative z-10"
+          className={`w-full h-full object-cover ${frameNumber === 9 ? 'object-center sm:object-top lg:object-[center_35%]' : 'object-top'} relative z-10`}
         />
         {(frameNumber === 7 || frameNumber === 8 || isHeartburn) && (
           <div className="absolute inset-0 bg-gradient-to-t from-red-600/40 via-orange-600/20 to-transparent pointer-events-none z-20 animate-flame-volcano" />
