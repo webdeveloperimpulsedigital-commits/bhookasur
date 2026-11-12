@@ -301,13 +301,17 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
           </button>
         </div>
 
-        {/* Register CTA: LIVE FOOD TOUR KE LIYE REGISTER KARO */}
+        {/* Register CTA: REGISTER NOW AND GET CHANCE TO WIN ZOMATO VOUCHER */}
         <div className="w-full shrink-0">
           <button
             id="btn-frame11-register"
             onClick={handleOpenRegistration}
             type="button"
-            className="w-full py-2.5 px-4 rounded-2xl bg-white hover:bg-slate-50 text-[#0B1B48] border-2 border-[#0B1B48] font-black text-xs sm:text-sm uppercase tracking-wide active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
+            className={`w-full py-2.5 sm:py-3 px-4 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wide active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+              hasRegistered
+                ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-2 border-emerald-500 shadow-xs'
+                : 'bg-[#E23744] hover:bg-[#cb202d] text-white shadow-md shadow-[#E23744]/30 border-0'
+            }`}
           >
             <span className="leading-tight">
               {hasRegistered ? 'TOUR PASS CLAIMED / REGISTERED ✓' : 'REGISTER NOW AND GET CHANCE TO WIN ZOMATO VOUCHER'}
@@ -395,7 +399,11 @@ export const Frame11LiveMap: React.FC<Frame11LiveMapProps> = ({
               id="btn-frame11-register"
               onClick={handleOpenRegistration}
               type="button"
-              className="w-full py-3 px-6 rounded-2xl bg-white hover:bg-slate-50 text-[#0B1B48] border-2 border-[#0B1B48] font-black text-xs lg:text-sm uppercase tracking-wide active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs text-center"
+              className={`w-full py-3.5 px-6 rounded-2xl font-black text-xs lg:text-sm uppercase tracking-wide active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md text-center ${
+                hasRegistered
+                  ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-2 border-emerald-500 shadow-xs'
+                  : 'bg-[#E23744] hover:bg-[#cb202d] text-white shadow-[#E23744]/30 border-0'
+              }`}
             >
               <span className="leading-tight">
                 {hasRegistered ? 'TOUR PASS CLAIMED / REGISTERED ✓' : 'REGISTER NOW AND GET CHANCE TO WIN ZOMATO VOUCHER'}

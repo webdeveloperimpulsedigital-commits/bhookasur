@@ -89,50 +89,40 @@ export const BakasurShareCardModal: React.FC<BakasurShareCardModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Check if device is Laptop, Desktop PC, or Tablet (including when tested in DevTools mobile mode on PC)
+  // Check if device is Laptop, Desktop PC, or Tablet (for web experience) vs Mobile Phone (for native apps)
   const isPCorTablet = () => {
     if (typeof window === 'undefined') return false;
 
-    // 1. Physical monitor resolution: On PC/laptops, screen resolution is >= 1024
-    if (typeof window.screen !== 'undefined') {
-      if (window.screen.width >= 1024 || window.screen.height >= 1024) {
-        return true;
-      }
-    }
-
-    // 2. Hardware platform: On PC/Mac, platform is Win32/MacIntel
-    const nav = typeof navigator !== 'undefined' ? (navigator as any) : null;
-    if (nav) {
-      const platform = (nav.platform || '').toLowerCase();
-      if (
-        platform.includes('win') ||
-        platform.includes('mac') ||
-        (platform.includes('linux') && !platform.includes('arm') && !platform.includes('android'))
-      ) {
-        return true;
-      }
-      const uaPlatform = (nav.userAgentData?.platform || '').toLowerCase();
-      if (uaPlatform.includes('win') || uaPlatform.includes('mac') || uaPlatform.includes('linux')) {
-        return true;
-      }
-    }
-
-    // 3. User agent string
+    // 1. Definite mobile user-agent check
     const ua = (typeof navigator !== 'undefined' ? navigator.userAgent || '' : '').toLowerCase();
+    const isMobilePhone = /android.+mobile|iphone|ipod|blackberry|iemobile|opera mini/i.test(ua);
+    if (isMobilePhone) {
+      return false; // Definitely a mobile phone!
+    }
+
+    // 2. Navigator userAgentData mobile flag check if available
+    const nav = typeof navigator !== 'undefined' ? (navigator as any) : null;
+    if (nav?.userAgentData?.mobile === true) {
+      return false;
+    }
+
+    // 3. Platform check for desktop OS: Windows, Macintosh, ChromeOS, Desktop Linux
+    const platform = ((nav?.platform || '') + ' ' + (nav?.userAgentData?.platform || '')).toLowerCase();
     if (
-      ua.includes('windows') ||
-      ua.includes('macintosh') ||
-      ua.includes('cros') ||
-      (ua.includes('linux') && !ua.includes('android')) ||
-      ua.includes('ipad') ||
-      ua.includes('tablet') ||
-      (ua.includes('android') && !ua.includes('mobile'))
+      platform.includes('win') ||
+      platform.includes('mac') ||
+      platform.includes('cros') ||
+      (platform.includes('linux') && !ua.includes('android'))
     ) {
       return true;
     }
 
-    // 4. Viewport width
-    if (window.innerWidth >= 768) {
+    if (ua.includes('windows') || ua.includes('macintosh') || (ua.includes('linux') && !ua.includes('android'))) {
+      return true;
+    }
+
+    // 4. Fallback check for large desktop screens (only if not mobile UA)
+    if (typeof window.screen !== 'undefined' && window.innerWidth >= 1024) {
       return true;
     }
 
@@ -169,9 +159,9 @@ export const BakasurShareCardModal: React.FC<BakasurShareCardModalProps> = ({
     return false;
   };
 
-  // WhatsApp Share Handler
+  // WhatsApp Share Handler: Opens WhatsApp Web on PC, and native WhatsApp app on Mobile
   const handleShareWhatsApp = async () => {
-    // 1. LAPTOP / TAB / PC (or testing on PC): Open WhatsApp Web in a new tab immediately
+    // 1. LAPTOP / DESKTOP PC: Open WhatsApp Web in a new tab immediately
     if (isPCorTablet()) {
       const waUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
       window.open(waUrl, '_blank', 'noopener,noreferrer');
@@ -180,39 +170,28 @@ export const BakasurShareCardModal: React.FC<BakasurShareCardModalProps> = ({
       return;
     }
 
-    // 2. MOBILE PHONE: Native App Share (pure image only + text caption)
-    let file = preloadedFileRef.current;
-    if (!file) {
-      try {
-        const res = await fetch(activeImageSrc);
-        const blob = await res.blob();
-        file = new File([blob], 'bhookasur-food-tour.jpg', { type: 'image/jpeg' });
-      } catch {
-        // ignore
-      }
-    }
+    // 2. MOBILE PHONE: Open native WhatsApp App directly with message prefilled
+    await copyTextToClipboard(shareText);
+    showToast('Opening WhatsApp app...');
 
-    if (file && typeof navigator !== 'undefined' && navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({
-          title: 'Bhookasur Ka Food Tour',
-          text: shareText,
-          files: [file]
-        });
-        return;
-      } catch (err) {
-        if ((err as Error)?.name === 'AbortError') return;
-      }
-    }
+    // Custom URI scheme: Launches the WhatsApp application directly on iOS and Android
+    const waAppScheme = `whatsapp://send?text=${encodeURIComponent(shareText)}`;
+    const waFallbackUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
 
-    // Mobile fallback if Web Share is unavailable
-    const mobileWaUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
-    window.open(mobileWaUrl, '_blank');
+    // Try direct WhatsApp app launch
+    window.location.href = waAppScheme;
+
+    // Safety fallback: if WhatsApp app is not installed or protocol is blocked, redirect to universal link
+    setTimeout(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        window.location.href = waFallbackUrl;
+      }
+    }, 1500);
   };
 
-  // Instagram Share Handler: Shares pure image + copies caption
+  // Instagram Share Handler: Opens Instagram Web on PC, and native Instagram app on Mobile
   const handleShareInstagram = async () => {
-    // 1. LAPTOP / TAB / PC (or testing on PC): Open Instagram DM in a new tab immediately
+    // 1. LAPTOP / DESKTOP PC: Open Instagram DM in a new tab immediately
     if (isPCorTablet()) {
       window.open('https://www.instagram.com/direct/inbox/', '_blank', 'noopener,noreferrer');
       copyTextToClipboard(shareText);
@@ -238,42 +217,22 @@ export const BakasurShareCardModal: React.FC<BakasurShareCardModalProps> = ({
       return;
     }
 
-    // 2. MOBILE PHONE:
-    // ALWAYS copy full text message and link to clipboard first
+    // 2. MOBILE PHONE: Open native Instagram App directly
     await copyTextToClipboard(shareText);
+    showToast('📋 Message copied! Opening Instagram DM — paste in chat.');
 
-    // Share ONLY the pure image file
-    let file = preloadedFileRef.current;
-    if (!file) {
-      try {
-        const res = await fetch(activeImageSrc);
-        const blob = await res.blob();
-        file = new File([blob], 'bhookasur-food-tour.jpg', { type: 'image/jpeg' });
-      } catch {
-        // ignore
-      }
-    }
+    // Instagram deep link scheme to open Direct Messages on iOS & Android
+    const instaAppScheme = 'instagram://direct';
+    const instaFallbackUrl = 'https://www.instagram.com/direct/inbox/';
 
-    if (file && typeof navigator !== 'undefined' && navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        showToast('📸 Photo ready & 📋 Message copied! Tap "Paste" in Instagram chat.');
-        await navigator.share({
-          title: 'Bhookasur Ka Food Tour',
-          text: shareText,
-          files: [file]
-        });
-        return;
-      } catch (err) {
-        if ((err as Error)?.name === 'AbortError') return;
-      }
-    }
+    window.location.href = instaAppScheme;
 
-    // Mobile fallback if Web Share is unavailable
-    showToast('📋 Message copied! Opening Instagram DM...');
-    window.location.href = 'instagram://direct';
+    // Safety fallback: if Instagram app is not installed or doesn't take over, open web direct inbox
     setTimeout(() => {
-      window.open('https://www.instagram.com/direct/inbox/', '_blank');
-    }, 1200);
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        window.location.href = instaFallbackUrl;
+      }
+    }, 1500);
   };
 
   return (
