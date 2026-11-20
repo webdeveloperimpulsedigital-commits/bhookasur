@@ -91,16 +91,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('consent', 'default', {
-                analytics_storage: 'denied',
-                ad_storage: 'denied',
-                ad_user_data: 'denied',
-                ad_personalization: 'denied',
-                functionality_storage: 'denied',
-                personalization_storage: 'denied',
+                analytics_storage: 'granted',
+                ad_storage: 'granted',
+                ad_user_data: 'granted',
+                ad_personalization: 'granted',
+                functionality_storage: 'granted',
+                personalization_storage: 'granted',
                 security_storage: 'granted'
               });
               gtag('js', new Date());
-              gtag('config', '${GA_MEASUREMENT_ID}');
+              gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: true });
             `,
           }}
         />

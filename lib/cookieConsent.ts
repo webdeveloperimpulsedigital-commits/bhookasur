@@ -25,9 +25,9 @@ export const DEFAULT_CONSENT_STATE: CookieConsentState = {
   version: 1,
   hasInteracted: false,
   necessary: true,
-  location: false,
-  interaction: false,
-  campaign: false,
+  location: true,
+  interaction: true,
+  campaign: true,
   consentedAt: null,
   consentMethod: null,
   language: 'en',
@@ -68,7 +68,7 @@ export function hasConsentFor(category: ConsentCategory): boolean {
 
   const state = getCookieConsent();
   if (!state.hasInteracted) {
-    return false;
+    return true;
   }
   return Boolean(state[category]);
 }
@@ -84,9 +84,9 @@ export function syncGoogleConsentMode(state: CookieConsentState): void {
     gtag?: (...args: unknown[]) => void;
   };
 
-  const analyticsGranted = state.hasInteracted && state.campaign ? 'granted' : 'denied';
-  const functionalityGranted = state.hasInteracted && state.location ? 'granted' : 'denied';
-  const personalizationGranted = state.hasInteracted && state.interaction ? 'granted' : 'denied';
+  const analyticsGranted = !state.hasInteracted || state.campaign ? 'granted' : 'denied';
+  const functionalityGranted = !state.hasInteracted || state.location ? 'granted' : 'denied';
+  const personalizationGranted = !state.hasInteracted || state.interaction ? 'granted' : 'denied';
 
   try {
     if (typeof w.gtag === 'function') {
