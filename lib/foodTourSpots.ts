@@ -25,7 +25,7 @@ export const FOOD_TOUR_SPOTS: FoodTourSpot[] = [
     spotName: 'Sri Krishna Dosa Corner',
     city: 'Pune',
     eatingMedia: '/images/all-frames/Dosa.mp4',
-    emptyMedia: '/images/all-frames/Showing Empty Plate.mp4',
+    emptyMedia: '/images/all-frames/Showing%20Empty%20Plate.mp4',
     eatingCopy: {
       line1: 'Dosa table se bada tha.',
       line2Prefix: 'Bakasur ki ',
@@ -46,8 +46,8 @@ export const FOOD_TOUR_SPOTS: FoodTourSpot[] = [
     dishName: 'Extra Butter Pav Bhaji',
     spotName: 'Shivaji Chowk Famous Pav Bhaji',
     city: 'Pune',
-    eatingMedia: '/images/all-frames/Pav Bhaji.mp4',
-    emptyMedia: '/images/all-frames/Showing Empty Plate.mp4',
+    eatingMedia: '/images/all-frames/Pav%20Bhaji.mp4',
+    emptyMedia: '/images/all-frames/Showing%20Empty%20Plate.mp4',
     eatingCopy: {
       line1: 'Amul butter ka swimming pool tha.',
       line2Prefix: 'Bakasur ne ',

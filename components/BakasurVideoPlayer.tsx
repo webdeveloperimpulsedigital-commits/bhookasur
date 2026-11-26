@@ -509,13 +509,13 @@ export const BakasurVideoPlayer: React.FC<BakasurVideoPlayerProps> = ({
         : '/images/final-frames/2.mp4';
     }
     else if (frameNumber === 3 || frameNumber === 4) src = '/images/final-frames/3.mp4';
-    else if (frameNumber === 6) src = '/images/all-frames/Showing Love.mp4';
+    else if (frameNumber === 6) src = '/images/all-frames/Showing%20Love.mp4';
     else if (frameNumber === 7 || frameNumber === 8 || isHeartburn) src = '/images/final-frames/Acidity-and-Dakare.mp4';
     else if (frameNumber === 9) src = '/images/final-frames/Drinking-Gastrium-final.mp4';
     else if (frameNumber === 10) src = '/images/final-frames/Bhookasur-Showing-Heart.mp4';
-    else if (frameNumber === 11) src = '/images/all-frames/Showing Love.mp4';
-    else if (frameNumber === 12) src = '/images/all-frames/Showing Love.mp4';
-    else if (frameNumber === 13) src = '/images/all-frames/Thumbs Up.mp4';
+    else if (frameNumber === 11) src = '/images/all-frames/Showing%20Love.mp4';
+    else if (frameNumber === 12) src = '/images/all-frames/Showing%20Love.mp4';
+    else if (frameNumber === 13) src = '/images/all-frames/Thumbs%20Up.mp4';
 
     return getPreloadedUrl(src);
   }, [frameNumber, isHeartburn, videoUrl, isDesktop]);
@@ -540,9 +540,17 @@ export const BakasurVideoPlayer: React.FC<BakasurVideoPlayerProps> = ({
     let isMounted = true;
     const playVideo = async () => {
       try {
+        video.defaultMuted = true;
+        video.muted = true;
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', 'true');
+        video.setAttribute('x5-playsinline', 'true');
+        if (video.src !== activeVideoSrc) {
+          video.src = activeVideoSrc;
+          video.load();
+        }
         video.currentTime = 0;
         video.playbackRate = 1.0;
-        video.muted = !soundEnabled;
         const p = video.play();
         if (p !== undefined) {
           await p;
@@ -606,16 +614,36 @@ export const BakasurVideoPlayer: React.FC<BakasurVideoPlayerProps> = ({
       </div>
 
       {/* Main Stage Media Render */}
-      <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#182858]">
+      <div
+        onClick={() => {
+          if (videoRef.current && videoRef.current.paused) {
+            videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+          }
+        }}
+        onTouchStart={() => {
+          if (videoRef.current && videoRef.current.paused) {
+            videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+          }
+        }}
+        className="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#182858]"
+      >
         <video
-          ref={videoRef}
-          key={activeVideoSrc}
+          ref={(el) => {
+            videoRef.current = el;
+            if (el) {
+              el.defaultMuted = true;
+              el.muted = true;
+              el.setAttribute('playsinline', '');
+              el.setAttribute('webkit-playsinline', 'true');
+              el.setAttribute('x5-playsinline', 'true');
+            }
+          }}
           src={activeVideoSrc}
           poster={withBasePath(activePosterSrc)}
           playsInline
           autoPlay
           loop={frameNumber === 9 ? false : loop}
-          muted={!soundEnabled}
+          muted={true}
           preload="auto"
           onLoadedData={() => {
             if (videoRef.current) {
@@ -655,6 +683,21 @@ export const BakasurVideoPlayer: React.FC<BakasurVideoPlayerProps> = ({
           }}
           className={`w-full h-full object-cover ${frameNumber === 9 ? 'object-center' : 'object-top'} relative z-10`}
         />
+        {!isPlaying && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (videoRef.current) {
+                videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+              }
+            }}
+            className="absolute z-25 p-3.5 rounded-full bg-black/60 text-white backdrop-blur-md border border-white/25 shadow-2xl active:scale-95 transition-all cursor-pointer pointer-events-auto"
+            aria-label="Play animation"
+          >
+            <Play className="w-7 h-7 fill-white ml-0.5" />
+          </button>
+        )}
         {(frameNumber === 7 || frameNumber === 8 || isHeartburn) && (
           <div className="absolute inset-0 bg-gradient-to-t from-red-600/40 via-orange-600/20 to-transparent pointer-events-none z-20 animate-flame-volcano" />
         )}

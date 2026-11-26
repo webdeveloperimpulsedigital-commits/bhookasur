@@ -102,7 +102,7 @@ export const Frame6FeedingLoop: React.FC<Frame6FeedingLoopProps> = ({
           onPlaying={() => setIsVideoLoaded(true)}
           onError={() => {
             if (videoRef.current && !videoRef.current.src.includes('Showing%20Love') && !videoRef.current.src.includes('Showing Love')) {
-              videoRef.current.src = '/images/all-frames/Showing Love.mp4';
+              videoRef.current.src = withBasePath('/images/all-frames/Showing%20Love.mp4');
               videoRef.current.load();
               videoRef.current.play().catch(() => {});
             }

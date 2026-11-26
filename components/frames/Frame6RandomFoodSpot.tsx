@@ -126,11 +126,12 @@ export const Frame6RandomFoodSpot: React.FC<Frame6RandomFoodSpotProps> = ({
           {isVideo ? (
             <video
               key={`${spot.id}-${currentStep}`}
-              src={activeMedia}
+              src={withBasePath(activeMedia)}
               playsInline
               autoPlay
               loop={false}
-              muted={!soundEnabled}
+              muted={true}
+              preload="auto"
               onEnded={() => {
                 // When video naturally reaches end, transition to next phase
                 if (currentStep === 1) {
@@ -144,7 +145,7 @@ export const Frame6RandomFoodSpot: React.FC<Frame6RandomFoodSpotProps> = ({
           ) : (
             <img
               key={`${spot.id}-${currentStep}`}
-              src={activeMedia}
+              src={withBasePath(activeMedia)}
               alt={`${spot.dishName} at ${spot.spotName}`}
               className="w-full h-full object-cover object-[center_25%] transition-opacity duration-300"
             />

@@ -102,12 +102,27 @@ export const Frame7AcidityAppears: React.FC<Frame7AcidityAppearsProps> = ({
         className="relative w-full lg:w-1/2 bg-[#182858] flex items-center justify-center overflow-hidden shrink-0 lg:h-full h-[60%] xs:h-[62%] sm:h-[60%]"
       >
         <video
+          ref={(el) => {
+            if (el) {
+              el.defaultMuted = true;
+              el.muted = true;
+              el.setAttribute('playsinline', '');
+              el.setAttribute('webkit-playsinline', 'true');
+            }
+          }}
           src={getPreloadedUrl('/images/final-frames/Acidity-and-Dakare.mp4')}
           poster={withBasePath('/images/final-frames/Acidity-and-Dakare_poster.jpg')}
           autoPlay
           loop
           muted
           playsInline
+          preload="auto"
+          onLoadedData={(e) => {
+            e.currentTarget.play().catch(() => {});
+          }}
+          onCanPlay={(e) => {
+            e.currentTarget.play().catch(() => {});
+          }}
           className="w-full h-full object-cover object-top"
         />
         <div className="absolute bottom-0 inset-x-0 h-12 lg:hidden bg-gradient-to-t from-black/30 to-transparent pointer-events-none z-20" />

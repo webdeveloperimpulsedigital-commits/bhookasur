@@ -14,18 +14,20 @@ export const BASE_PATH = (
  */
 export function withBasePath(path: string): string {
   if (!path) return path;
+  // Automatically encode raw spaces to %20 to prevent iOS Safari AVPlayer media parse failures
+  const encodedPath = path.replace(/ /g, '%20');
   if (
-    path.startsWith('http://') ||
-    path.startsWith('https://') ||
-    path.startsWith('data:') ||
-    path.startsWith('blob:')
+    encodedPath.startsWith('http://') ||
+    encodedPath.startsWith('https://') ||
+    encodedPath.startsWith('data:') ||
+    encodedPath.startsWith('blob:')
   ) {
-    return path;
+    return encodedPath;
   }
-  if (!BASE_PATH) return path;
-  if (path.startsWith(BASE_PATH + '/') || path === BASE_PATH) {
-    return path;
+  if (!BASE_PATH) return encodedPath;
+  if (encodedPath.startsWith(BASE_PATH + '/') || encodedPath === BASE_PATH) {
+    return encodedPath;
   }
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  const cleanPath = encodedPath.startsWith('/') ? encodedPath : `/${encodedPath}`;
   return `${BASE_PATH}${cleanPath}`;
 }

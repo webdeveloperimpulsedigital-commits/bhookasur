@@ -1229,46 +1229,6 @@ export default function CampaignPage() {
         />
       )}
 
-      {/* High-speed active background preloader to pre-buffer upcoming frame videos in browser cache */}
-      <div className="fixed -top-[9999px] -left-[9999px] w-1 h-1 opacity-0 pointer-events-none overflow-hidden" aria-hidden="true">
-        {currentFrame === 1 && (
-          <>
-            <video src="/images/final-frames/2.mp4" preload="auto" muted />
-            <video src="/images/final-frames/Bakasur-Pointing-Rightside.mp4" preload="auto" muted />
-            <video src="/images/final-frames/3.mp4" preload="auto" muted />
-          </>
-        )}
-        {currentFrame === 2 && (
-          <>
-            <video src="/images/final-frames/3.mp4" preload="auto" muted />
-            <video src="/images/final-frames/front-eat-video.mp4" preload="auto" muted />
-          </>
-        )}
-        {currentFrame === 3 && (
-          <>
-            <video src="/images/final-frames/front-eat-video.mp4" preload="auto" muted />
-            <video src="/images/final-frames/side-view-final.mp4?v=2" preload="auto" muted />
-            <video src="/images/final-frames/5.mp4" preload="auto" muted />
-          </>
-        )}
-        {currentFrame === 5 && (
-          <>
-            <video src="/images/final-frames/5.mp4" preload="auto" muted />
-            <video src="/images/final-frames/Bhookasur-Food-Eating.mp4" preload="auto" muted />
-            <video src="/images/final-frames/Bhookasur-Food-Eating-dekstop.mp4" preload="auto" muted />
-          </>
-        )}
-        {currentFrame === 6 && (
-          <>
-            <video src="/images/final-frames/Acidity-and-Dakare.mp4" preload="auto" muted />
-            <video src="/images/final-frames/Bhookasur-Food-Eating.mp4" preload="auto" muted />
-            <video src="/images/final-frames/Bhookasur-Food-Eating-dekstop.mp4" preload="auto" muted />
-          </>
-        )}
-        {(currentFrame === 7 || currentFrame === 8) && (
-          <video src="/images/final-frames/Drinking-Gastrium-final.mp4" preload="auto" muted />
-        )}
-      </div>
     </div>
   );
 }

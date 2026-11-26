@@ -114,12 +114,21 @@ export const VideoTransitionOverlay: React.FC<VideoTransitionOverlayProps> = ({
         )}
         <video
           key={currentSrc}
-          ref={videoRef}
+          ref={(el) => {
+            videoRef.current = el;
+            if (el) {
+              el.defaultMuted = true;
+              el.muted = true;
+              el.setAttribute('playsinline', '');
+              el.setAttribute('webkit-playsinline', 'true');
+              el.setAttribute('x5-playsinline', 'true');
+            }
+          }}
           src={currentSrc}
           playsInline
           autoPlay
           preload="auto"
-          muted={!soundEnabled}
+          muted={true}
           onEnded={handleAction}
           onLoadedMetadata={markLoadedAndPlay}
           onLoadedData={markLoadedAndPlay}
